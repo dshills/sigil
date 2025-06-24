@@ -24,6 +24,8 @@ const (
 	ErrorTypeNetwork ErrorType = "NETWORK"
 	// User input errors
 	ErrorTypeInput ErrorType = "INPUT"
+	// Output errors
+	ErrorTypeOutput ErrorType = "OUTPUT"
 	// Internal/unexpected errors
 	ErrorTypeInternal ErrorType = "INTERNAL"
 )
