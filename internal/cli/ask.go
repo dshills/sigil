@@ -8,6 +8,7 @@ import (
 
 	"github.com/dshills/sigil/internal/errors"
 	"github.com/dshills/sigil/internal/logger"
+	"github.com/dshills/sigil/internal/memory"
 	"github.com/dshills/sigil/internal/model"
 	"github.com/spf13/cobra"
 )
@@ -89,6 +90,12 @@ func (c *AskCommand) Execute(ctx context.Context, args []string) error {
 	duration := time.Since(start)
 	output := CreateOutput("ask", inputCtx, response, duration)
 
+	// Store session in memory
+	if err := c.storeSession(inputCtx, response, duration); err != nil {
+		logger.Warn("failed to store session memory", "error", err)
+		// Don't fail the command, just log the warning
+	}
+
 	// Write output
 	outputHandler := NewOutputHandler(c.GetCommonFlags())
 	if err := outputHandler.WriteOutput(output); err != nil {
@@ -168,6 +175,35 @@ func (c *AskCommand) buildPrompt(inputCtx *CommandContext, memoryCtx []model.Mem
 		MaxTokens:    4000,
 		Temperature:  0.1, // Lower temperature for more focused responses
 	}
+}
+
+// storeSession stores the session in memory
+func (c *AskCommand) storeSession(inputCtx *CommandContext, response model.PromptOutput, duration time.Duration) error {
+	memManager, err := memory.NewManager()
+	if err != nil {
+		return errors.Wrap(err, errors.ErrorTypeConfig, "storeSession", "failed to create memory manager")
+	}
+
+	// Build input description
+	var inputDesc strings.Builder
+	inputDesc.WriteString(fmt.Sprintf("Question: %s\n", c.Question))
+
+	if inputCtx.Input != "" {
+		switch inputCtx.InputType {
+		case InputTypeFile:
+			if len(inputCtx.Files) > 0 {
+				inputDesc.WriteString(fmt.Sprintf("File: %s", inputCtx.Files[0].Path))
+			}
+		case InputTypeDirectory:
+			inputDesc.WriteString("Directory context provided")
+		case InputTypeGitDiff:
+			inputDesc.WriteString("Git diff provided")
+		case InputTypeText:
+			inputDesc.WriteString("Text context provided")
+		}
+	}
+
+	return memManager.StoreSession("ask", inputDesc.String(), response, duration)
 }
 
 // Create the global ask command instance

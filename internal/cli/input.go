@@ -13,6 +13,7 @@ import (
 	"github.com/dshills/sigil/internal/errors"
 	"github.com/dshills/sigil/internal/git"
 	"github.com/dshills/sigil/internal/logger"
+	"github.com/dshills/sigil/internal/memory"
 	"github.com/dshills/sigil/internal/model"
 )
 
@@ -278,8 +279,27 @@ func (h *InputHandler) GetMemoryContext() ([]model.MemoryEntry, error) {
 		return nil, nil
 	}
 
-	// TODO: Implement memory retrieval
 	logger.Debug("memory context requested", "depth", h.flags.MemoryDepth)
 
-	return []model.MemoryEntry{}, nil
+	// Create memory manager
+	memManager, err := memory.NewManager()
+	if err != nil {
+		logger.Warn("failed to create memory manager", "error", err)
+		return nil, nil // Don't fail the command, just skip memory
+	}
+
+	// Get recent context entries
+	limit := h.flags.MemoryDepth
+	if limit <= 0 {
+		limit = 5 // Default
+	}
+
+	entries, err := memManager.GetRecentContext(limit)
+	if err != nil {
+		logger.Warn("failed to get memory context", "error", err)
+		return nil, nil // Don't fail the command, just skip memory
+	}
+
+	logger.Debug("retrieved memory context", "count", len(entries))
+	return entries, nil
 }

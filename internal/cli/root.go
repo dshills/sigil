@@ -6,6 +6,7 @@ import (
 
 	"github.com/dshills/sigil/internal/config"
 	"github.com/dshills/sigil/internal/git"
+	"github.com/dshills/sigil/internal/memory"
 	"github.com/dshills/sigil/internal/model"
 	"github.com/dshills/sigil/internal/model/providers/anthropic"
 	"github.com/dshills/sigil/internal/model/providers/mcp"
@@ -54,6 +55,7 @@ func init() {
 	rootCmd.AddCommand(reviewCmd)
 	rootCmd.AddCommand(diffCmd)
 	rootCmd.AddCommand(docCmd)
+	rootCmd.AddCommand(memoryCmd)
 }
 
 func initConfig() {
@@ -73,6 +75,14 @@ func initConfig() {
 
 	// Register model providers
 	initModelProviders()
+
+	// Initialize memory system
+	if err := memory.InitializeMemory(); err != nil {
+		if verboseFlag {
+			fmt.Fprintf(os.Stderr, "Warning: Failed to initialize memory: %v\n", err)
+		}
+		// Continue without memory - don't fail the command
+	}
 }
 
 func initModelProviders() {
