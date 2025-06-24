@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
 	"gopkg.in/yaml.v3"
 )
@@ -57,7 +58,7 @@ func (l *Loader) Load(configFile string) (*Config, error) {
 	}
 
 	// Return default configuration
-	return Default(), nil
+	return &defaultConfig, nil
 }
 
 // loadFromFile loads configuration from a specific file
@@ -68,22 +69,22 @@ func (l *Loader) loadFromFile(path string) (*Config, error) {
 	}
 
 	// Start with default config
-	config := Default()
+	config := defaultConfig
 
 	// Unmarshal YAML into config
-	if err := yaml.Unmarshal(data, config); err != nil {
+	if err := yaml.Unmarshal(data, &config); err != nil {
 		return nil, fmt.Errorf("failed to parse config file: %w", err)
 	}
 
 	// Validate configuration
-	if err := l.validate(config); err != nil {
+	if err := l.validate(&config); err != nil {
 		return nil, fmt.Errorf("invalid configuration: %w", err)
 	}
 
 	// Expand paths
-	l.expandPaths(config)
+	l.expandPaths(&config)
 
-	return config, nil
+	return &config, nil
 }
 
 // validate checks if the configuration is valid
@@ -93,16 +94,18 @@ func (l *Loader) validate(config *Config) error {
 		return fmt.Errorf("lead model must be specified")
 	}
 
-	// Validate backend
-	validBackends := map[string]bool{
-		"openai":    true,
-		"anthropic": true,
-		"ollama":    true,
-		"mcp":       true,
-	}
+	// Validate backend if specified
+	if config.Backend != "" {
+		validBackends := map[string]bool{
+			"openai":    true,
+			"anthropic": true,
+			"ollama":    true,
+			"mcp":       true,
+		}
 
-	if !validBackends[config.Backend] {
-		return fmt.Errorf("invalid backend: %s", config.Backend)
+		if !validBackends[config.Backend] {
+			return fmt.Errorf("invalid backend: %s", config.Backend)
+		}
 	}
 
 	// Validate MCP configuration if backend is MCP
@@ -116,19 +119,13 @@ func (l *Loader) validate(config *Config) error {
 	}
 
 	// Validate memory configuration
-	if config.Memory.MaxDepth <= 0 {
-		config.Memory.MaxDepth = 10
-	}
 	if config.Memory.MaxEntries <= 0 {
-		config.Memory.MaxEntries = 100
+		config.Memory.MaxEntries = 10
 	}
 
 	// Validate sandbox configuration
 	if config.Sandbox.Timeout <= 0 {
-		config.Sandbox.Timeout = 300
-	}
-	if config.Sandbox.MaxAttempts <= 0 {
-		config.Sandbox.MaxAttempts = 3
+		config.Sandbox.Timeout = 5 * time.Minute
 	}
 
 	return nil
@@ -181,7 +178,7 @@ func (l *Loader) Save(config *Config, path string) error {
 // CreateDefaultConfig creates a default configuration file
 func CreateDefaultConfig() error {
 	loader := NewLoader()
-	config := Default()
+	config := &defaultConfig
 
 	// Try to create in .sigil directory
 	return loader.Save(config, ".sigil/config.yml")

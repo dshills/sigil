@@ -59,7 +59,7 @@ func initConfig() {
 	}
 
 	// Load configuration
-	if err := config.Load(configFile); err != nil {
+	if _, err := config.Load(configFile); err != nil {
 		if verboseFlag {
 			fmt.Fprintf(os.Stderr, "Warning: Failed to load config: %v\n", err)
 		}
@@ -68,5 +68,9 @@ func initConfig() {
 }
 
 func checkGitRepository() error {
-	return git.IsGitRepository()
+	if err := git.IsGitRepository(); err != nil {
+		return fmt.Errorf("not in a git repository: %w", err)
+	}
+
+	return nil
 }
