@@ -6,6 +6,11 @@ import (
 
 	"github.com/dshills/sigil/internal/config"
 	"github.com/dshills/sigil/internal/git"
+	"github.com/dshills/sigil/internal/model"
+	"github.com/dshills/sigil/internal/model/providers/anthropic"
+	"github.com/dshills/sigil/internal/model/providers/mcp"
+	"github.com/dshills/sigil/internal/model/providers/ollama"
+	"github.com/dshills/sigil/internal/model/providers/openai"
 	"github.com/spf13/cobra"
 )
 
@@ -64,6 +69,27 @@ func initConfig() {
 			fmt.Fprintf(os.Stderr, "Warning: Failed to load config: %v\n", err)
 		}
 		// Continue with default configuration
+	}
+
+	// Register model providers
+	initModelProviders()
+}
+
+func initModelProviders() {
+	// Register all providers
+	providers := map[string]model.Factory{
+		"openai":    openai.NewProvider(),
+		"anthropic": anthropic.NewProvider(),
+		"ollama":    ollama.NewProvider(),
+		"mcp":       mcp.NewProvider(),
+	}
+
+	for name, provider := range providers {
+		if err := model.RegisterProvider(name, provider); err != nil {
+			if verboseFlag {
+				fmt.Fprintf(os.Stderr, "Warning: Failed to register provider %s: %v\n", name, err)
+			}
+		}
 	}
 }
 
