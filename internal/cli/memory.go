@@ -12,6 +12,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	defaultMemorySubcommand = "list"
+)
+
 // MemoryCommand implements the memory command
 type MemoryCommand struct {
 	*BaseCommand
@@ -52,7 +56,7 @@ func (c *MemoryCommand) Execute(ctx context.Context, args []string) error {
 	if len(args) > 0 {
 		c.Subcommand = args[0]
 	} else {
-		c.Subcommand = "list" // Default
+		c.Subcommand = defaultMemorySubcommand // Default
 	}
 
 	// Create memory manager

@@ -56,6 +56,7 @@ func init() {
 	rootCmd.AddCommand(diffCmd)
 	rootCmd.AddCommand(docCmd)
 	rootCmd.AddCommand(memoryCmd)
+	rootCmd.AddCommand(sandboxCmd)
 }
 
 func initConfig() {
