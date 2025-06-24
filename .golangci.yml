@@ -48,7 +48,9 @@ linters:
     
   # Disable some default linters if needed
   disable:
-    - errcheck      # Can be noisy, enable selectively
+    - dupl      # Model implementations have similar structure
+    - errcheck  # Can be noisy, enable selectively
+    - godot     # Overly strict about comment periods
 
   # Linter-specific settings
   settings:
@@ -63,6 +65,8 @@ linters:
         - name: error-strings
         - name: error-naming
         - name: exported
+          arguments:
+            - disableStutteringCheck
         - name: if-return
         - name: increment-decrement
         - name: var-naming
@@ -191,3 +195,20 @@ issues:
   
   # Fix found issues (if supported by linter)
   fix: false
+  
+  # Exclude specific issues
+  exclude-rules:
+    # Duplication is expected in model implementations
+    - path: "internal/model/(openai|anthropic|ollama|mcp).go"
+      linters:
+        - dupl
+    
+    # Allow stuttering in model package for clarity
+    - path: "internal/model/interface.go"
+      linters:
+        - revive
+      text: "type name will be used as model.ModelCapabilities by other packages, and that stutters"
+    - path: "internal/model/interface.go"
+      linters:
+        - revive
+      text: "type name will be used as model.ModelConfig by other packages, and that stutters"
