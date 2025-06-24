@@ -1,0 +1,48 @@
+# Sigil Validation Rules
+
+# Rules that must pass before accepting changes
+validation:
+  # Testing rules
+  - command: go test ./...
+    description: All unit tests must pass
+    required: true
+    
+  # Linting rules  
+  - command: golangci-lint run
+    description: Code must pass all linters
+    required: true
+    
+  # Build rules
+  - command: go build ./...
+    description: Code must compile successfully
+    required: true
+
+# Code quality thresholds
+quality:
+  # Test coverage threshold
+  test_coverage:
+    enabled: false
+    threshold: 80
+    
+  # Cyclomatic complexity
+  complexity:
+    enabled: false
+    max_complexity: 10
+
+# File patterns to validate
+patterns:
+  # Include patterns
+  include:
+    - "**/*.go"
+    
+  # Exclude patterns  
+  exclude:
+    - "**/vendor/**"
+    - "**/testdata/**"
+    - "**/*_test.go"  # Can be removed to include test files
+
+# Custom validation scripts
+# custom:
+#   - script: ./scripts/validate.sh
+#     description: Run custom validation script
+#     required: false

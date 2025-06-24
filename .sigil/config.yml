@@ -1,0 +1,43 @@
+# Sigil Configuration File
+
+# Model configuration
+models:
+  # Primary model for code transformation
+  lead: openai:gpt-4
+  
+  # Optional reviewer models for multi-agent validation
+  reviewers:
+    # - anthropic:claude-3-sonnet
+    # - ollama:codellama-70b
+
+# Default backend (openai, anthropic, ollama, mcp)
+backend: openai
+
+# MCP server configuration (if using MCP backend)
+# mcp:
+#   server_url: http://localhost:8080
+#   model: sigil-agent
+
+# Validation rules
+rules:
+  - must_pass: go test ./...
+    description: All tests must pass
+  - must_pass: golangci-lint run
+    description: Code must pass linting
+
+# Memory system configuration
+memory:
+  enabled: true
+  global_path: ~/.sigil/SIGIL.md
+  local_path: .sigil/SIGIL.md
+  max_depth: 10
+  max_entries: 100
+
+# Sandbox configuration
+sandbox:
+  enabled: true
+  timeout: 300  # seconds
+  max_attempts: 3
+  validators:
+    - go test
+    - golangci-lint run
