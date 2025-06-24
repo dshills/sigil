@@ -57,6 +57,7 @@ func init() {
 	rootCmd.AddCommand(docCmd)
 	rootCmd.AddCommand(memoryCmd)
 	rootCmd.AddCommand(sandboxCmd)
+	rootCmd.AddCommand(multiAgentCmd)
 }
 
 func initConfig() {
