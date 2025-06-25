@@ -20,12 +20,12 @@ const (
 // SandboxCommand implements the sandbox command
 type SandboxCommand struct {
 	*BaseCommand
-	Subcommand string
-	Command    string
-	Args       []string
-	File       string
-	Content    string
-	Timeout    time.Duration
+	Subcommand   string
+	Command      string
+	Args         []string
+	ValidateFile string
+	Content      string
+	Timeout      time.Duration
 }
 
 // NewSandboxCommand creates a new sandbox command
@@ -355,7 +355,7 @@ func (c *SandboxCommand) GetCobraCommand() *cobra.Command {
 	// Add sandbox-specific flags
 	cmd.Flags().StringVarP(&c.Command, "command", "c", "", "Command to execute")
 	cmd.Flags().StringArrayVarP(&c.Args, "args", "a", []string{}, "Command arguments")
-	cmd.Flags().StringVarP(&c.File, "file", "f", "", "File to validate")
+	cmd.Flags().StringVar(&c.ValidateFile, "validate-file", "", "File to validate")
 	cmd.Flags().StringVar(&c.Content, "content", "", "Content to validate")
 	cmd.Flags().DurationVarP(&c.Timeout, "timeout", "t", 5*time.Minute, "Execution timeout")
 

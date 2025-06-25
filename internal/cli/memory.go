@@ -240,8 +240,8 @@ func (c *MemoryCommand) GetCobraCommand() *cobra.Command {
 
 	// Add memory-specific flags
 	cmd.Flags().IntVarP(&c.Limit, "limit", "l", 10, "Limit number of results")
-	cmd.Flags().StringVarP(&c.Format, "format", "f", "text", "Export format (text, markdown, json)")
-	cmd.Flags().StringVarP(&c.Output, "output", "o", "", "Output file for export")
+	cmd.Flags().StringVar(&c.Format, "format", "text", "Export format (text, markdown, json)")
+	cmd.Flags().StringVar(&c.Output, "output", "", "Output file for export")
 
 	// Add examples
 	cmd.Example = `  # List recent memory entries
