@@ -349,6 +349,8 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Built with [Cobra](https://github.com/spf13/cobra) for CLI structure
 - Uses [go-git](https://github.com/go-git/go-git) for Git operations
 - Inspired by AI-assisted development tools
+- Developed with [Claude Code](https://claude.ai/code) - Anthropic's AI coding assistant
+- Influenced by [OpenAI Codex](https://openai.com/blog/openai-codex) and modern AI pair programming tools
 
 ## Roadmap
 
