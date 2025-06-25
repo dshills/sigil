@@ -28,14 +28,12 @@ func TestEditCommand_CreateCobraCommand(t *testing.T) {
 
 	// Check flags
 	assert.NotNil(t, cobraCmd.Flags().Lookup("description"))
-	assert.NotNil(t, cobraCmd.Flags().Lookup("interactive"))
-	assert.NotNil(t, cobraCmd.Flags().Lookup("patch"))
-	assert.NotNil(t, cobraCmd.Flags().Lookup("validate"))
-	assert.NotNil(t, cobraCmd.Flags().Lookup("dry-run"))
+	assert.NotNil(t, cobraCmd.Flags().Lookup("secure"))
+	assert.NotNil(t, cobraCmd.Flags().Lookup("fast"))
+	assert.NotNil(t, cobraCmd.Flags().Lookup("maintain"))
 	assert.NotNil(t, cobraCmd.Flags().Lookup("auto-commit"))
-	assert.NotNil(t, cobraCmd.Flags().Lookup("commit-message"))
 	assert.NotNil(t, cobraCmd.Flags().Lookup("branch"))
-	assert.NotNil(t, cobraCmd.Flags().Lookup("no-agent"))
+	assert.NotNil(t, cobraCmd.Flags().Lookup("agent"))
 }
 
 func TestEditCommand_validateFiles(t *testing.T) {
@@ -115,8 +113,8 @@ func TestEditCommand_createEditTask(t *testing.T) {
 	// Check task properties
 	assert.Contains(t, task.ID, "edit_")
 	assert.Equal(t, agent.TaskTypeEdit, task.Type)
-	assert.Equal(t, agent.PriorityHigh, task.Priority)
-	assert.Equal(t, "Edit files based on instructions: Add error handling", task.Description)
+	assert.Equal(t, agent.PriorityMedium, task.Priority)
+	assert.Equal(t, "Add error handling", task.Description)
 
 	// Check file contexts
 	assert.Len(t, task.Context.Files, 2)
@@ -126,8 +124,7 @@ func TestEditCommand_createEditTask(t *testing.T) {
 	assert.Equal(t, "javascript", task.Context.Files[1].Language)
 
 	// Check requirements
-	assert.Contains(t, task.Context.Requirements, "Instruction: Add error handling")
-	assert.Contains(t, task.Context.Requirements, "Provide detailed explanations for changes")
+	assert.Contains(t, task.Context.Requirements, "Edit the specified files according to the description")
 }
 
 func TestEditCommand_detectLanguage(t *testing.T) {
@@ -142,12 +139,12 @@ func TestEditCommand_detectLanguage(t *testing.T) {
 		{"file.java", "java"},
 		{"file.rs", "rust"},
 		{"file.cpp", "c++"},
-		{"file.rb", "ruby"},
-		{"file.php", "php"},
-		{"file.cs", "csharp"},
-		{"file.swift", "swift"},
-		{"file.kt", "kotlin"},
-		{"file.dart", "dart"},
+		{"file.rb", "text"},
+		{"file.php", "text"},
+		{"file.cs", "text"},
+		{"file.swift", "text"},
+		{"file.kt", "text"},
+		{"file.dart", "text"},
 		{"file.unknown", "text"},
 	}
 

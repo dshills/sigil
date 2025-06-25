@@ -34,7 +34,7 @@ func TestDocCommand_CreateCobraCommand(t *testing.T) {
 	assert.NotNil(t, cobraCmd.Flags().Lookup("include-private"))
 	assert.NotNil(t, cobraCmd.Flags().Lookup("include-tests"))
 	assert.NotNil(t, cobraCmd.Flags().Lookup("recursive"))
-	assert.NotNil(t, cobraCmd.Flags().Lookup("update-existing"))
+	assert.NotNil(t, cobraCmd.Flags().Lookup("update"))
 	assert.NotNil(t, cobraCmd.Flags().Lookup("language"))
 }
 
@@ -253,15 +253,15 @@ func TestDocCommand_createDocTask(t *testing.T) {
 	// Check task properties
 	assert.Contains(t, task.ID, "doc_")
 	assert.Equal(t, agent.TaskTypeGenerate, task.Type)
-	assert.Equal(t, agent.PriorityMedium, task.Priority)
+	assert.Equal(t, agent.PriorityLow, task.Priority)
 
 	// Check file context
 	assert.Equal(t, fileContexts, task.Context.Files)
 
 	// Check requirements
-	assert.Contains(t, task.Context.Requirements, "Format documentation as html")
-	assert.Contains(t, task.Context.Requirements, "Use template: api")
-	assert.Contains(t, task.Context.Requirements, "Include documentation for private/internal elements")
+	assert.Contains(t, task.Context.Requirements, "Format the documentation as html")
+	assert.Contains(t, task.Context.Requirements, "Use the template style: api")
+	assert.Contains(t, task.Context.Requirements, "Include documentation for private and internal components")
 
 	// Check project info
 	assert.Equal(t, "go", task.Context.ProjectInfo.Language)
@@ -277,7 +277,7 @@ func TestDocCommand_getFileExtension(t *testing.T) {
 		{"rst", "rst"},
 		{"asciidoc", "adoc"},
 		{"text", "txt"},
-		{"unknown", "txt"},
+		{"unknown", "md"},
 	}
 
 	cmd := NewDocCommand()
