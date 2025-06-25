@@ -165,15 +165,15 @@ func newMCPStatusCommand() *cobra.Command {
 			fmt.Fprintln(w, "----\t------\t------\t----------")
 
 			for _, server := range servers {
-				connected, uptime, lastErr := server.GetStatus()
+				serverStatus := server.GetStatus()
 				status := "disconnected"
-				if connected {
+				if serverStatus.Connected {
 					status = "connected"
 				}
 
 				errMsg := "-"
-				if lastErr != nil {
-					errMsg = lastErr.Error()
+				if serverStatus.LastError != "" {
+					errMsg = serverStatus.LastError
 					if len(errMsg) > 40 {
 						errMsg = errMsg[:40] + "..."
 					}
@@ -182,7 +182,7 @@ func newMCPStatusCommand() *cobra.Command {
 				fmt.Fprintf(w, "%s\t%s\t%s\t%s\n",
 					server.Name,
 					status,
-					formatDuration(uptime),
+					formatDuration(serverStatus.Uptime),
 					errMsg)
 			}
 
