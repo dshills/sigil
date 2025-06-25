@@ -13,7 +13,7 @@ import (
 func TestNewDocCommand(t *testing.T) {
 	cmd := NewDocCommand()
 	assert.NotNil(t, cmd)
-	assert.Equal(t, "doc", cmd.BaseCommand.Name)
+	assert.Equal(t, "doc", cmd.Name)
 	assert.Equal(t, "markdown", cmd.Format)
 	assert.Equal(t, "docs", cmd.OutputDir)
 	assert.NotZero(t, cmd.startTime)
@@ -498,7 +498,7 @@ func TestDocCommand_fileOperations(t *testing.T) {
 		// Check permissions
 		info, err := os.Stat(testFile)
 		require.NoError(t, err)
-		assert.Equal(t, os.FileMode(0644), info.Mode().Perm())
+		assert.Equal(t, os.FileMode(0600), info.Mode().Perm())
 	})
 }
 

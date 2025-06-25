@@ -16,7 +16,7 @@ import (
 
 func TestNewProvider(t *testing.T) {
 	provider := NewProvider()
-	
+
 	assert.NotNil(t, provider)
 	assert.NotNil(t, provider.client)
 	assert.Equal(t, defaultTimeout, provider.client.Timeout)
@@ -30,9 +30,9 @@ func TestProvider_Name(t *testing.T) {
 func TestProvider_ListModels(t *testing.T) {
 	provider := NewProvider()
 	ctx := context.Background()
-	
+
 	models, err := provider.ListModels(ctx)
-	
+
 	assert.NoError(t, err)
 	assert.NotEmpty(t, models)
 	assert.Contains(t, models, "claude-3-opus-20240229")
@@ -42,54 +42,54 @@ func TestProvider_ListModels(t *testing.T) {
 
 func TestProvider_CreateModel(t *testing.T) {
 	provider := NewProvider()
-	
+
 	t.Run("valid config", func(t *testing.T) {
 		config := model.ModelConfig{
 			APIKey: "test-api-key",
 			Model:  "claude-3-5-sonnet-20241022",
 		}
-		
+
 		model, err := provider.CreateModel(config)
-		
+
 		assert.NoError(t, err)
 		assert.NotNil(t, model)
-		
+
 		anthropicModel, ok := model.(*Model)
 		assert.True(t, ok)
 		assert.Equal(t, "test-api-key", anthropicModel.apiKey)
 		assert.Equal(t, "claude-3-5-sonnet-20241022", anthropicModel.modelName)
 		assert.Equal(t, defaultBaseURL, anthropicModel.baseURL)
 	})
-	
+
 	t.Run("missing API key", func(t *testing.T) {
 		config := model.ModelConfig{
 			Model: "claude-3-5-sonnet-20241022",
 		}
-		
+
 		model, err := provider.CreateModel(config)
-		
+
 		assert.Error(t, err)
 		assert.Nil(t, model)
 		assert.Contains(t, err.Error(), "API key is required")
 	})
-	
+
 	t.Run("custom endpoint", func(t *testing.T) {
 		config := model.ModelConfig{
 			APIKey:   "test-api-key",
 			Model:    "claude-3-5-sonnet-20241022",
 			Endpoint: "https://custom.anthropic.com/v1",
 		}
-		
+
 		model, err := provider.CreateModel(config)
-		
+
 		assert.NoError(t, err)
 		assert.NotNil(t, model)
-		
+
 		anthropicModel, ok := model.(*Model)
 		assert.True(t, ok)
 		assert.Equal(t, "https://custom.anthropic.com/v1", anthropicModel.baseURL)
 	})
-	
+
 	t.Run("custom timeout", func(t *testing.T) {
 		customTimeout := 60 * time.Second
 		config := model.ModelConfig{
@@ -99,12 +99,12 @@ func TestProvider_CreateModel(t *testing.T) {
 				"timeout": customTimeout,
 			},
 		}
-		
+
 		model, err := provider.CreateModel(config)
-		
+
 		assert.NoError(t, err)
 		assert.NotNil(t, model)
-		
+
 		anthropicModel, ok := model.(*Model)
 		assert.True(t, ok)
 		assert.Equal(t, customTimeout, anthropicModel.client.Timeout)
@@ -117,14 +117,14 @@ func TestModel_GetCapabilities(t *testing.T) {
 		APIKey: "test-api-key",
 		Model:  "claude-3-5-sonnet-20241022",
 	}
-	
+
 	model, err := provider.CreateModel(config)
 	require.NoError(t, err)
-	
+
 	capabilities := model.GetCapabilities()
-	
+
 	assert.Equal(t, 200000, capabilities.MaxTokens) // Claude-3 model
-	assert.True(t, capabilities.SupportsImages) // Claude-3 supports vision
+	assert.True(t, capabilities.SupportsImages)     // Claude-3 supports vision
 	assert.True(t, capabilities.SupportsTools)
 	assert.False(t, capabilities.SupportsStreaming)
 }
@@ -135,10 +135,10 @@ func TestModel_Name(t *testing.T) {
 		APIKey: "test-api-key",
 		Model:  "claude-3-5-sonnet-20241022",
 	}
-	
+
 	model, err := provider.CreateModel(config)
 	require.NoError(t, err)
-	
+
 	assert.Equal(t, "anthropic:claude-3-5-sonnet-20241022", model.Name())
 }
 
@@ -152,7 +152,7 @@ func TestModel_RunPrompt(t *testing.T) {
 			assert.Equal(t, "test-api-key", r.Header.Get("x-api-key"))
 			assert.Equal(t, apiVersion, r.Header.Get("anthropic-version"))
 			assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
-			
+
 			// Parse request body
 			var req MessageRequest
 			err := json.NewDecoder(r.Body).Decode(&req)
@@ -162,7 +162,7 @@ func TestModel_RunPrompt(t *testing.T) {
 			assert.Equal(t, float32(0.7), req.Temperature)
 			assert.Len(t, req.Messages, 1)
 			assert.Equal(t, "user", req.Messages[0].Role)
-			
+
 			// Send mock response
 			response := MessageResponse{
 				ID:    "msg_123",
@@ -180,12 +180,12 @@ func TestModel_RunPrompt(t *testing.T) {
 					OutputTokens: 15,
 				},
 			}
-			
+
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(response)
 		}))
 		defer server.Close()
-		
+
 		// Create model with mock server
 		provider := NewProvider()
 		config := model.ModelConfig{
@@ -193,10 +193,10 @@ func TestModel_RunPrompt(t *testing.T) {
 			Model:    "claude-3-5-sonnet-20241022",
 			Endpoint: server.URL,
 		}
-		
+
 		modelInstance, err := provider.CreateModel(config)
 		require.NoError(t, err)
-		
+
 		// Test prompt
 		input := model.PromptInput{
 			SystemPrompt: "You are a helpful assistant.",
@@ -204,16 +204,16 @@ func TestModel_RunPrompt(t *testing.T) {
 			MaxTokens:    1000,
 			Temperature:  0.7,
 		}
-		
+
 		ctx := context.Background()
 		output, err := modelInstance.RunPrompt(ctx, input)
-		
+
 		assert.NoError(t, err)
 		assert.Equal(t, "This is a test response from Claude", output.Response)
 		assert.Equal(t, 40, output.TokensUsed) // InputTokens + OutputTokens
 		assert.Equal(t, "claude-3-5-sonnet-20241022", output.Model)
 	})
-	
+
 	t.Run("API error", func(t *testing.T) {
 		// Create mock server that returns error
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -221,7 +221,7 @@ func TestModel_RunPrompt(t *testing.T) {
 			w.Write([]byte(`{"type": "error", "error": {"type": "authentication_error", "message": "Invalid API key"}}`))
 		}))
 		defer server.Close()
-		
+
 		// Create model with mock server
 		provider := NewProvider()
 		config := model.ModelConfig{
@@ -229,24 +229,24 @@ func TestModel_RunPrompt(t *testing.T) {
 			Model:    "claude-3-5-sonnet-20241022",
 			Endpoint: server.URL,
 		}
-		
+
 		modelInstance, err := provider.CreateModel(config)
 		require.NoError(t, err)
-		
+
 		// Test prompt
 		input := model.PromptInput{
 			SystemPrompt: "You are a helpful assistant.",
 			UserPrompt:   "Hello",
 		}
-		
+
 		ctx := context.Background()
 		output, err := modelInstance.RunPrompt(ctx, input)
-		
+
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "API error 401:")
 		assert.Empty(t, output.Response)
 	})
-	
+
 	t.Run("with files", func(t *testing.T) {
 		// Create mock server
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -254,11 +254,11 @@ func TestModel_RunPrompt(t *testing.T) {
 			var req MessageRequest
 			err := json.NewDecoder(r.Body).Decode(&req)
 			assert.NoError(t, err)
-			
+
 			// Should have user message with file content
 			assert.Len(t, req.Messages, 1)
 			assert.Equal(t, "user", req.Messages[0].Role)
-			
+
 			// Check that file content is included in content blocks
 			found := false
 			for _, block := range req.Messages[0].Content {
@@ -268,7 +268,7 @@ func TestModel_RunPrompt(t *testing.T) {
 				}
 			}
 			assert.True(t, found, "File content should be included in message content blocks")
-			
+
 			// Send response
 			response := MessageResponse{
 				ID:   "msg_123",
@@ -285,12 +285,12 @@ func TestModel_RunPrompt(t *testing.T) {
 					OutputTokens: 20,
 				},
 			}
-			
+
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(response)
 		}))
 		defer server.Close()
-		
+
 		// Create model with mock server
 		provider := NewProvider()
 		config := model.ModelConfig{
@@ -298,10 +298,10 @@ func TestModel_RunPrompt(t *testing.T) {
 			Model:    "claude-3-5-sonnet-20241022",
 			Endpoint: server.URL,
 		}
-		
+
 		modelInstance, err := provider.CreateModel(config)
 		require.NoError(t, err)
-		
+
 		// Test prompt with files
 		input := model.PromptInput{
 			SystemPrompt: "You are a code reviewer.",
@@ -314,10 +314,10 @@ func TestModel_RunPrompt(t *testing.T) {
 				},
 			},
 		}
-		
+
 		ctx := context.Background()
 		output, err := modelInstance.RunPrompt(ctx, input)
-		
+
 		assert.NoError(t, err)
 		assert.Equal(t, "I can see the Go code you provided.", output.Response)
 		assert.Equal(t, 50, output.TokensUsed)
@@ -330,12 +330,12 @@ func TestModel_buildRequest(t *testing.T) {
 		APIKey: "test-api-key",
 		Model:  "claude-3-5-sonnet-20241022",
 	}
-	
+
 	modelInstance, err := provider.CreateModel(config)
 	require.NoError(t, err)
-	
+
 	anthropicModel := modelInstance.(*Model)
-	
+
 	t.Run("basic request", func(t *testing.T) {
 		input := model.PromptInput{
 			SystemPrompt: "You are helpful.",
@@ -343,9 +343,9 @@ func TestModel_buildRequest(t *testing.T) {
 			MaxTokens:    1000,
 			Temperature:  0.7,
 		}
-		
+
 		req := anthropicModel.buildRequest(input)
-		
+
 		assert.Equal(t, "claude-3-5-sonnet-20241022", req.Model)
 		assert.Equal(t, 1000, req.MaxTokens)
 		assert.Equal(t, float32(0.7), req.Temperature)
@@ -355,7 +355,7 @@ func TestModel_buildRequest(t *testing.T) {
 		assert.Len(t, req.Messages[0].Content, 1)
 		assert.Equal(t, "Hello", req.Messages[0].Content[0].Text)
 	})
-	
+
 	t.Run("with files", func(t *testing.T) {
 		input := model.PromptInput{
 			SystemPrompt: "You are helpful.",
@@ -368,9 +368,9 @@ func TestModel_buildRequest(t *testing.T) {
 				},
 			},
 		}
-		
+
 		req := anthropicModel.buildRequest(input)
-		
+
 		assert.Len(t, req.Messages, 1)
 		assert.Equal(t, "user", req.Messages[0].Role)
 		// Check content blocks contain file information
@@ -383,15 +383,15 @@ func TestModel_buildRequest(t *testing.T) {
 		}
 		assert.True(t, found, "File content should be included in message content blocks")
 	})
-	
+
 	t.Run("default values", func(t *testing.T) {
 		input := model.PromptInput{
 			UserPrompt: "Hello",
 		}
-		
+
 		req := anthropicModel.buildRequest(input)
-		
-		assert.Equal(t, 1000, req.MaxTokens) // default
+
+		assert.Equal(t, 1000, req.MaxTokens)           // default
 		assert.Equal(t, float32(0.7), req.Temperature) // default
 	})
 }
@@ -406,7 +406,7 @@ func TestMessage_Structure(t *testing.T) {
 			},
 		},
 	}
-	
+
 	assert.Equal(t, "user", msg.Role)
 	assert.Len(t, msg.Content, 1)
 	assert.Equal(t, "text", msg.Content[0].Type)
@@ -431,7 +431,7 @@ func TestMessageRequest_Structure(t *testing.T) {
 			},
 		},
 	}
-	
+
 	assert.Equal(t, "claude-3-5-sonnet-20241022", req.Model)
 	assert.Equal(t, 1000, req.MaxTokens)
 	assert.Equal(t, float32(0.7), req.Temperature)
@@ -458,7 +458,7 @@ func TestMessageResponse_Structure(t *testing.T) {
 			OutputTokens: 15,
 		},
 	}
-	
+
 	assert.Equal(t, "msg_123", response.ID)
 	assert.Equal(t, "message", response.Type)
 	assert.Equal(t, "assistant", response.Role)
@@ -474,7 +474,7 @@ func TestContentBlock_Structure(t *testing.T) {
 		Type: "text",
 		Text: "Hello world",
 	}
-	
+
 	assert.Equal(t, "text", block.Type)
 	assert.Equal(t, "Hello world", block.Text)
 }

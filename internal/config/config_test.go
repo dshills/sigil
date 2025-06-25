@@ -30,7 +30,7 @@ sandbox:
   enabled: true
   timeout: 300s
 `
-		err := os.WriteFile(configPath, []byte(configContent), 0644)
+		err := os.WriteFile(configPath, []byte(configContent), 0600)
 		require.NoError(t, err)
 
 		config, err := Load(configPath)
@@ -61,7 +61,7 @@ models:
   lead: "openai:gpt-4"
   invalid_yaml: [
 `
-		err := os.WriteFile(invalidPath, []byte(invalidContent), 0644)
+		err := os.WriteFile(invalidPath, []byte(invalidContent), 0600)
 		require.NoError(t, err)
 
 		config, err := Load(invalidPath)
@@ -76,7 +76,7 @@ models:
 models:
   lead: "invalid-model-format"
 `
-		err := os.WriteFile(invalidModelPath, []byte(invalidModelContent), 0644)
+		err := os.WriteFile(invalidModelPath, []byte(invalidModelContent), 0600)
 		require.NoError(t, err)
 
 		config, err := Load(invalidModelPath)
@@ -154,7 +154,7 @@ func TestConfigSave(t *testing.T) {
 	t.Run("save to nested directory", func(t *testing.T) {
 		config := &defaultConfig
 		nestedPath := filepath.Join(tmpDir, "nested", "deep", "config.yml")
-		
+
 		err := config.Save(nestedPath)
 		require.NoError(t, err)
 		assert.FileExists(t, nestedPath)
@@ -165,7 +165,7 @@ func TestConfigValidate(t *testing.T) {
 	t.Run("valid config passes validation", func(t *testing.T) {
 		config := &Config{
 			Models: ModelsConfig{
-				Lead: "openai:gpt-4",
+				Lead:      "openai:gpt-4",
 				Reviewers: []string{"anthropic:claude-3"},
 			},
 			Logging: LoggingConfig{
@@ -204,7 +204,7 @@ func TestConfigValidate(t *testing.T) {
 	t.Run("invalid reviewer model format fails validation", func(t *testing.T) {
 		config := &Config{
 			Models: ModelsConfig{
-				Lead: "openai:gpt-4",
+				Lead:      "openai:gpt-4",
 				Reviewers: []string{"invalid-format"},
 			},
 		}
@@ -354,7 +354,7 @@ func TestApplyEnvOverrides(t *testing.T) {
 	t.Run("no environment variables set", func(t *testing.T) {
 		originalConfig := &Config{
 			Models: ModelsConfig{
-				Lead: "original:model",
+				Lead:    "original:model",
 				Configs: make(map[string]model.ModelConfig),
 			},
 			Logging: LoggingConfig{

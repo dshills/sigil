@@ -91,7 +91,7 @@ func (c *DocCommand) validateInputs() error {
 		}
 	}
 
-	validFormats := []string{"markdown", "html", "rst", "asciidoc", "text"}
+	validFormats := []string{FormatMarkdown, FormatHTML, "rst", "asciidoc", "text"}
 	formatValid := false
 	for _, format := range validFormats {
 		if c.Format == format {
@@ -114,7 +114,7 @@ func (c *DocCommand) ensureOutputDir() error {
 
 // processFiles reads and processes all specified files
 func (c *DocCommand) processFiles() ([]agent.FileContext, error) {
-	var fileContexts []agent.FileContext
+	fileContexts := make([]agent.FileContext, 0, len(c.Files))
 
 	for _, filePath := range c.Files {
 		// Skip test files if not including tests
@@ -325,9 +325,9 @@ func (c *DocCommand) writeDocFile(artifact agent.Artifact) error {
 // getFileExtension returns the appropriate file extension for the format
 func (c *DocCommand) getFileExtension() string {
 	switch c.Format {
-	case "markdown":
+	case FormatMarkdown:
 		return "md"
-	case "html":
+	case FormatHTML:
 		return "html"
 	case "rst":
 		return "rst"
@@ -350,13 +350,13 @@ func (c *DocCommand) detectProjectLanguage() string {
 		return "go"
 	}
 	if c.fileExists("package.json") {
-		return "javascript"
+		return LangJavaScript
 	}
 	if c.fileExists("requirements.txt") || c.fileExists("setup.py") {
-		return "python"
+		return LangPython
 	}
 	if c.fileExists("pom.xml") || c.fileExists("build.gradle") {
-		return "java"
+		return LangJava
 	}
 	return "text"
 }
@@ -364,13 +364,13 @@ func (c *DocCommand) detectProjectLanguage() string {
 // detectFramework detects the framework being used
 func (c *DocCommand) detectFramework() string {
 	if c.fileExists("next.config.js") {
-		return "next.js"
+		return FrameworkNextJS
 	}
 	if c.fileExists("angular.json") {
-		return "angular"
+		return FrameworkAngular
 	}
 	if c.fileExists("vue.config.js") {
-		return "vue"
+		return FrameworkVue
 	}
 	return ""
 }
@@ -380,15 +380,15 @@ func (c *DocCommand) detectLanguage(filePath string) string {
 	if strings.HasSuffix(filePath, ".go") {
 		return "go"
 	} else if strings.HasSuffix(filePath, ".js") || strings.HasSuffix(filePath, ".ts") {
-		return "javascript"
+		return LangJavaScript
 	} else if strings.HasSuffix(filePath, ".py") {
-		return "python"
+		return LangPython
 	} else if strings.HasSuffix(filePath, ".java") {
-		return "java"
+		return LangJava
 	} else if strings.HasSuffix(filePath, ".cpp") || strings.HasSuffix(filePath, ".c") {
-		return "c++"
+		return LangCPP
 	} else if strings.HasSuffix(filePath, ".rs") {
-		return "rust"
+		return LangRust
 	}
 	return "text"
 }
@@ -452,7 +452,7 @@ func (c *DocCommand) writeFile(path, content string) error {
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		return err
 	}
-	return os.WriteFile(path, []byte(content), 0644)
+	return os.WriteFile(path, []byte(content), 0600)
 }
 
 // Legacy doc command for backwards compatibility

@@ -494,7 +494,7 @@ func TestValidationConfig_Limits(t *testing.T) {
 	config := DefaultValidationConfig()
 
 	// Test size limits are reasonable
-	assert.Equal(t, int64(1024*1024), config.MaxFileSize)      // 1MB
+	assert.Equal(t, int64(1024*1024), config.MaxFileSize)     // 1MB
 	assert.Equal(t, int64(10*1024*1024), config.MaxTotalSize) // 10MB
 	assert.Equal(t, 100, config.MaxFiles)
 

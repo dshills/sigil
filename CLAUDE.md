@@ -19,6 +19,9 @@ go build -o sigil
 
 # Run the application
 ./sigil [subcommand] [flags] [args]
+
+# Format code recursively
+gofmt -w .                          # Resolve formatting issues recursively
 ```
 
 ### Git Operations

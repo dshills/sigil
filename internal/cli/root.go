@@ -58,6 +58,7 @@ func init() {
 	rootCmd.AddCommand(memoryCmd)
 	rootCmd.AddCommand(sandboxCmd)
 	rootCmd.AddCommand(multiAgentCmd)
+	rootCmd.AddCommand(NewMCPCommand())
 }
 
 func initConfig() {

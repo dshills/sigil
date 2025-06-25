@@ -306,8 +306,8 @@ func TestValidator_ValidateRequest_BlockedPattern(t *testing.T) {
 		Type: "validation",
 		Files: []FileChange{
 			{
-				Path:      "bad.go",
-				Content:   `package main
+				Path: "bad.go",
+				Content: `package main
 
 const password = "secret123"
 
@@ -383,7 +383,7 @@ func TestValidator_GetRulesForPath(t *testing.T) {
 
 	t.Run("Go file", func(t *testing.T) {
 		fileRules, contentRules := validator.GetRulesForPath("main.go")
-		
+
 		// Should match Go source files rule
 		assert.NotEmpty(t, fileRules)
 		goRuleFound := false
@@ -401,7 +401,7 @@ func TestValidator_GetRulesForPath(t *testing.T) {
 
 	t.Run("Config file", func(t *testing.T) {
 		fileRules, contentRules := validator.GetRulesForPath("config.yml")
-		
+
 		// Note: filepath.Match doesn't support brace expansion like {yml,yaml,json,toml}
 		// So the config rule won't match due to this limitation
 		// fileRules may be nil if no rules match
@@ -413,7 +413,7 @@ func TestValidator_GetRulesForPath(t *testing.T) {
 
 	t.Run("Unknown file type", func(t *testing.T) {
 		fileRules, contentRules := validator.GetRulesForPath("unknown.xyz")
-		
+
 		// Should not match specific file rules
 		assert.Empty(t, fileRules)
 

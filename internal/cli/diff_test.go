@@ -15,7 +15,7 @@ import (
 func TestNewDiffCommand(t *testing.T) {
 	cmd := NewDiffCommand()
 	assert.NotNil(t, cmd)
-	assert.Equal(t, "diff", cmd.BaseCommand.Name)
+	assert.Equal(t, "diff", cmd.Name)
 	assert.Equal(t, "markdown", cmd.Format)
 	assert.Equal(t, 3, cmd.Context)
 	assert.NotZero(t, cmd.startTime)
@@ -398,15 +398,15 @@ func TestDiffCommand_fileOperations(t *testing.T) {
 func TestDiffCommand_Execute_Validation(t *testing.T) {
 	// Create a temporary directory that's not a git repo
 	tmpDir := t.TempDir()
-	
+
 	// Change to the temporary directory
 	originalDir, err := os.Getwd()
 	require.NoError(t, err)
 	defer os.Chdir(originalDir)
-	
+
 	err = os.Chdir(tmpDir)
 	require.NoError(t, err)
-	
+
 	cmd := NewDiffCommand()
 	ctx := context.Background()
 

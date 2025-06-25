@@ -327,7 +327,7 @@ func TestTrace(t *testing.T) {
 func TestFatal(t *testing.T) {
 	// This test is tricky because Fatal calls os.Exit(1)
 	// We'll test that it logs the message but skip the exit part
-	
+
 	// Save original stderr
 	originalStderr := os.Stderr
 	r, w, err := os.Pipe()
@@ -341,7 +341,7 @@ func TestFatal(t *testing.T) {
 	// We can't actually test the os.Exit(1) call in a unit test
 	// So we'll just test that the function exists and can be called
 	// In a real scenario, this would be tested with integration tests
-	
+
 	// Restore stderr
 	w.Close()
 	os.Stderr = originalStderr
@@ -355,11 +355,11 @@ func TestFatal(t *testing.T) {
 func TestLoggerIntegration(t *testing.T) {
 	// This is a more complete integration test that verifies
 	// the logger actually produces expected output formats
-	
+
 	t.Run("text format output", func(t *testing.T) {
 		// Reset state
 		defaultLogger = nil
-		
+
 		// We'll just verify initialization works
 		Initialize("info", "text")
 		logger := Get()
@@ -369,7 +369,7 @@ func TestLoggerIntegration(t *testing.T) {
 	t.Run("json format output", func(t *testing.T) {
 		// Reset state
 		defaultLogger = nil
-		
+
 		// We'll just verify initialization works
 		Initialize("info", "json")
 		logger := Get()

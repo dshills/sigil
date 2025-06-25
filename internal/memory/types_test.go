@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	
+
 	"github.com/dshills/sigil/internal/model"
 )
 
@@ -37,7 +37,7 @@ func TestMemoryEntry_Structure(t *testing.T) {
 func TestMemoryFilter_Structure(t *testing.T) {
 	after := time.Now().Add(-24 * time.Hour)
 	before := time.Now()
-	
+
 	filter := MemoryFilter{
 		Types:   []string{"session", "context"},
 		Command: "ask",
@@ -60,7 +60,7 @@ func TestMemoryFilter_Structure(t *testing.T) {
 func TestMemoryStats_Structure(t *testing.T) {
 	oldest := time.Now().Add(-24 * time.Hour)
 	newest := time.Now()
-	
+
 	stats := MemoryStats{
 		TotalEntries:   100,
 		EntriesByType:  map[string]int{"session": 50, "context": 30, "summary": 20},
@@ -188,14 +188,14 @@ func TestRandomString(t *testing.T) {
 
 func TestMemoryEntryTypes(t *testing.T) {
 	validTypes := []string{"session", "context", "summary", "decision"}
-	
+
 	for _, entryType := range validTypes {
 		t.Run(entryType, func(t *testing.T) {
 			entry := NewEntryBuilder().
 				WithType(entryType).
 				WithContent("Test content for " + entryType).
 				Build()
-			
+
 			assert.Equal(t, entryType, entry.Type)
 			assert.Contains(t, entry.Content, entryType)
 		})
@@ -209,9 +209,9 @@ func TestMemoryFilterValidation(t *testing.T) {
 		valid  bool
 	}{
 		{
-			name: "empty filter",
+			name:   "empty filter",
 			filter: MemoryFilter{},
-			valid: true,
+			valid:  true,
 		},
 		{
 			name: "with types",
@@ -242,7 +242,7 @@ func TestMemoryFilterValidation(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Basic validation - all test cases should be valid
 			assert.True(t, tt.valid)
-			
+
 			// Check that filter fields are accessible
 			if tt.filter.Types != nil {
 				assert.NotNil(t, tt.filter.Types)
@@ -255,7 +255,7 @@ func TestMemoryFilterValidation(t *testing.T) {
 func TestEntryBuilder_FluentInterface(t *testing.T) {
 	// Test that all methods return the builder for chaining
 	builder := NewEntryBuilder()
-	
+
 	result1 := builder.WithType("test")
 	result2 := builder.WithCommand("test")
 	result3 := builder.WithModel("test")
@@ -264,7 +264,7 @@ func TestEntryBuilder_FluentInterface(t *testing.T) {
 	result6 := builder.WithTags("test")
 	result7 := builder.WithTokens(1)
 	result8 := builder.WithDuration(time.Second)
-	
+
 	// All results should be the same builder instance
 	assert.Equal(t, builder, result1)
 	assert.Equal(t, builder, result2)

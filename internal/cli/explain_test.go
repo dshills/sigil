@@ -15,7 +15,7 @@ import (
 func TestNewExplainCommand(t *testing.T) {
 	cmd := NewExplainCommand()
 	assert.NotNil(t, cmd)
-	assert.Equal(t, "explain", cmd.BaseCommand.Name)
+	assert.Equal(t, "explain", cmd.Name)
 	assert.Equal(t, "markdown", cmd.Format)
 	assert.NotZero(t, cmd.startTime)
 }

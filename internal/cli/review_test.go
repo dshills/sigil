@@ -15,7 +15,7 @@ import (
 func TestNewReviewCommand(t *testing.T) {
 	cmd := NewReviewCommand()
 	assert.NotNil(t, cmd)
-	assert.Equal(t, "review", cmd.BaseCommand.Name)
+	assert.Equal(t, "review", cmd.Name)
 	assert.Equal(t, "warning", cmd.Severity)
 	assert.Equal(t, "markdown", cmd.Format)
 	assert.NotZero(t, cmd.startTime)

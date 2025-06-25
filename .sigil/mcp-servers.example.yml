@@ -1,0 +1,36 @@
+# Example MCP Server Configuration
+# Copy this file to mcp-servers.yml and customize for your needs
+
+servers:
+  # GitHub MCP Server - Provides access to GitHub repositories
+  - name: github-mcp
+    command: npx
+    args: [-y, "@modelcontextprotocol/server-github"]
+    env:
+      GITHUB_TOKEN: ${GITHUB_TOKEN}  # Set this in your environment
+    transport: stdio
+    auto_restart: true
+    max_restarts: 3
+    settings:
+      timeout: 30s
+      max_retries: 3
+
+  # Example Python MCP Server
+  - name: python-example
+    command: python
+    args: ["-m", "example_mcp_server"]
+    working_dir: /path/to/your/server
+    transport: stdio
+    auto_restart: true
+    settings:
+      timeout: 60s
+
+  # Example Node.js MCP Server
+  - name: nodejs-example
+    command: node
+    args: ["mcp-server.js"]
+    env:
+      NODE_ENV: production
+      API_KEY: ${MCP_API_KEY}
+    transport: stdio
+    auto_restart: false

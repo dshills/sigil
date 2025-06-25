@@ -24,7 +24,6 @@ linters:
     - goconst       # Finds repeated strings that could be constants
     - nakedret      # Naked returns in long functions
     - unconvert     # Remove unnecessary type conversions
-    - unparam       # Reports unused function parameters
     - whitespace    # Detects leading/trailing whitespace
     
     # Security
@@ -51,6 +50,7 @@ linters:
     - dupl      # Model implementations have similar structure
     - errcheck  # Can be noisy, enable selectively
     - godot     # Overly strict about comment periods
+    - unparam   # Too noisy for CLI applications with interface methods
 
   # Linter-specific settings
   settings:
@@ -109,6 +109,7 @@ linters:
       disable:
         - shadow        # Can be noisy
         - fieldalignment # Struct field alignment optimization suggestions
+        - unusedwrite   # Noisy in tests where fields are set for completeness
         
   # Exclusion rules
   exclusions:
@@ -137,6 +138,14 @@ linters:
           - dupl
           - goconst
           - gosec
+      
+      # Ignore context-keys-type in test files
+      - path: '(.+)_test\.go'
+        text: "context-keys-type"
+      
+      # Ignore SA1029 (context key types) in test files
+      - path: '(.+)_test\.go'
+        text: "SA1029"
           
       # Ignore long lines in generated files
       - path: '(.+)\.pb\.go'

@@ -31,7 +31,7 @@ func TestRegisterProvider(t *testing.T) {
 	t.Run("register new provider", func(t *testing.T) {
 		err := RegisterProvider("test", mockFactory)
 		assert.NoError(t, err)
-		
+
 		// Verify provider was registered
 		provider, err := GetProvider("test")
 		assert.NoError(t, err)
@@ -48,7 +48,7 @@ func TestRegisterProvider(t *testing.T) {
 		// Register with uppercase
 		err := RegisterProvider("TEST_UPPER", mockFactory)
 		assert.NoError(t, err)
-		
+
 		// Try to register with lowercase - should fail
 		err = RegisterProvider("test_upper", mockFactory)
 		assert.Error(t, err)
@@ -83,12 +83,12 @@ func TestGetProvider(t *testing.T) {
 	t.Run("case insensitive retrieval", func(t *testing.T) {
 		// Register with lowercase
 		RegisterProvider("casetest", mockFactory)
-		
+
 		// Retrieve with different cases
 		provider1, err1 := GetProvider("casetest")
 		provider2, err2 := GetProvider("CASETEST")
 		provider3, err3 := GetProvider("CaseTest")
-		
+
 		assert.NoError(t, err1)
 		assert.NoError(t, err2)
 		assert.NoError(t, err3)
@@ -111,7 +111,7 @@ func TestCreateModel(t *testing.T) {
 
 	mockFactory := &MockFactory{}
 	mockModel := &MockModel{}
-	
+
 	config := ModelConfig{
 		Provider: "test",
 		Model:    "test-model",
@@ -126,7 +126,7 @@ func TestCreateModel(t *testing.T) {
 		model, err := CreateModel(config)
 		assert.NoError(t, err)
 		assert.Equal(t, mockModel, model)
-		
+
 		// Verify model was cached
 		cachedModel, err := GetModel("test", "test-model")
 		assert.NoError(t, err)
@@ -138,7 +138,7 @@ func TestCreateModel(t *testing.T) {
 		model, err := CreateModel(config)
 		assert.NoError(t, err)
 		assert.Equal(t, mockModel, model)
-		
+
 		// Verify factory was called only once
 		mockFactory.AssertExpectations(t)
 	})
@@ -148,7 +148,7 @@ func TestCreateModel(t *testing.T) {
 			Provider: "nonexistent",
 			Model:    "test-model",
 		}
-		
+
 		model, err := CreateModel(invalidConfig)
 		assert.Error(t, err)
 		assert.Nil(t, model)
@@ -192,7 +192,7 @@ func TestListProviders(t *testing.T) {
 
 	mockFactory1 := &MockFactory{}
 	mockFactory2 := &MockFactory{}
-	
+
 	RegisterProvider("provider1", mockFactory1)
 	RegisterProvider("provider2", mockFactory2)
 
@@ -212,7 +212,7 @@ func TestListModels(t *testing.T) {
 
 	mockModel1 := &MockModel{}
 	mockModel2 := &MockModel{}
-	
+
 	defaultRegistry.models["provider1:model1"] = mockModel1
 	defaultRegistry.models["provider2:model2"] = mockModel2
 
@@ -291,7 +291,7 @@ func TestParseModelString(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			provider, model, err := ParseModelString(tt.modelString)
-			
+
 			if tt.expectError {
 				assert.Error(t, err)
 				assert.Empty(t, provider)
@@ -318,30 +318,30 @@ func TestRegistryThreadSafety(t *testing.T) {
 	defaultRegistry.models = make(map[string]Model)
 
 	mockFactory := &MockFactory{}
-	
+
 	// Test concurrent provider registration
 	done := make(chan bool, 2)
-	
+
 	go func() {
 		err := RegisterProvider("concurrent1", mockFactory)
 		assert.NoError(t, err)
 		done <- true
 	}()
-	
+
 	go func() {
 		err := RegisterProvider("concurrent2", mockFactory)
 		assert.NoError(t, err)
 		done <- true
 	}()
-	
+
 	// Wait for both goroutines to complete
 	<-done
 	<-done
-	
+
 	// Verify both providers were registered
 	provider1, err1 := GetProvider("concurrent1")
 	provider2, err2 := GetProvider("concurrent2")
-	
+
 	assert.NoError(t, err1)
 	assert.NoError(t, err2)
 	assert.Equal(t, mockFactory, provider1)
@@ -361,7 +361,7 @@ func TestModelCaching(t *testing.T) {
 
 	mockFactory := &MockFactory{}
 	mockModel := &MockModel{}
-	
+
 	config := ModelConfig{
 		Provider: "test",
 		Model:    "cache-test",
@@ -369,7 +369,7 @@ func TestModelCaching(t *testing.T) {
 	}
 
 	RegisterProvider("test", mockFactory)
-	
+
 	// Set up mock to be called only once
 	mockFactory.On("CreateModel", config).Return(mockModel, nil).Once()
 
@@ -382,10 +382,10 @@ func TestModelCaching(t *testing.T) {
 	model2, err2 := CreateModel(config)
 	assert.NoError(t, err2)
 	assert.Equal(t, mockModel, model2)
-	
+
 	// Verify they're the same instance
 	assert.True(t, model1 == model2)
-	
+
 	// Verify factory was called only once
 	mockFactory.AssertExpectations(t)
 }
@@ -407,12 +407,12 @@ func TestModelKeyGeneration(t *testing.T) {
 			// Create a mock model and add it to registry
 			mockModel := &MockModel{}
 			defaultRegistry.models[tt.expectedKey] = mockModel
-			
+
 			// Retrieve using provider and model
 			retrievedModel, err := GetModel(tt.provider, tt.model)
 			assert.NoError(t, err)
 			assert.Equal(t, mockModel, retrievedModel)
-			
+
 			// Clean up
 			delete(defaultRegistry.models, tt.expectedKey)
 		})

@@ -159,7 +159,7 @@ func (c *MultiAgentCommand) createTask(factory *agent.Factory, description strin
 	}
 
 	// Get file paths
-	var filePaths []string
+	filePaths := make([]string, 0, len(inputCtx.Files))
 	for _, file := range inputCtx.Files {
 		filePaths = append(filePaths, file.Path)
 	}
@@ -274,7 +274,7 @@ func (c *MultiAgentCommand) handleResults(result *agent.OrchestrationResult, inp
 	// Build response content
 	var responseBuilder strings.Builder
 
-	responseBuilder.WriteString(fmt.Sprintf("# Multi-Agent Task Results\n\n"))
+	responseBuilder.WriteString("# Multi-Agent Task Results\n\n")
 	responseBuilder.WriteString(fmt.Sprintf("**Task ID:** %s\n", result.TaskID))
 	responseBuilder.WriteString(fmt.Sprintf("**Status:** %s\n", result.Status))
 	responseBuilder.WriteString(fmt.Sprintf("**Lead Agent:** %s\n", result.LeadAgent))

@@ -15,7 +15,7 @@ import (
 func TestNewSummarizeCommand(t *testing.T) {
 	cmd := NewSummarizeCommand()
 	assert.NotNil(t, cmd)
-	assert.Equal(t, "summarize", cmd.BaseCommand.Name)
+	assert.Equal(t, "summarize", cmd.Name)
 	assert.Equal(t, "markdown", cmd.Format)
 	assert.NotZero(t, cmd.startTime)
 }

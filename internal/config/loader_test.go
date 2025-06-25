@@ -331,7 +331,7 @@ func TestLoaderExpandPaths(t *testing.T) {
 		// GlobalPath should be expanded
 		assert.NotEqual(t, "~/global", config.Memory.GlobalPath)
 		assert.Contains(t, config.Memory.GlobalPath, "global")
-		
+
 		// LocalPath should remain unchanged
 		assert.Equal(t, "./local", config.Memory.LocalPath)
 	})

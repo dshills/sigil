@@ -293,17 +293,17 @@ func (c *EditCommand) detectProjectLanguage() string {
 
 	// Check for JavaScript/TypeScript
 	if c.fileExists("package.json") {
-		return "javascript"
+		return LangJavaScript
 	}
 
 	// Check for Python
 	if c.fileExists("requirements.txt") || c.fileExists("setup.py") || c.fileExists("pyproject.toml") {
-		return "python"
+		return LangPython
 	}
 
 	// Check for Java
 	if c.fileExists("pom.xml") || c.fileExists("build.gradle") {
-		return "java"
+		return LangJava
 	}
 
 	return "text"
@@ -313,13 +313,13 @@ func (c *EditCommand) detectProjectLanguage() string {
 func (c *EditCommand) detectFramework() string {
 	// Check for specific framework files
 	if c.fileExists("next.config.js") {
-		return "next.js"
+		return FrameworkNextJS
 	}
 	if c.fileExists("angular.json") {
-		return "angular"
+		return FrameworkAngular
 	}
 	if c.fileExists("vue.config.js") {
-		return "vue"
+		return FrameworkVue
 	}
 
 	return ""
@@ -330,15 +330,15 @@ func (c *EditCommand) detectLanguage(filePath string) string {
 	if strings.HasSuffix(filePath, ".go") {
 		return "go"
 	} else if strings.HasSuffix(filePath, ".js") || strings.HasSuffix(filePath, ".ts") {
-		return "javascript"
+		return LangJavaScript
 	} else if strings.HasSuffix(filePath, ".py") {
-		return "python"
+		return LangPython
 	} else if strings.HasSuffix(filePath, ".java") {
-		return "java"
+		return LangJava
 	} else if strings.HasSuffix(filePath, ".cpp") || strings.HasSuffix(filePath, ".c") {
-		return "c++"
+		return LangCPP
 	} else if strings.HasSuffix(filePath, ".rs") {
-		return "rust"
+		return LangRust
 	}
 	return "text"
 }

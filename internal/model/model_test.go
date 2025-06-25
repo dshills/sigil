@@ -153,7 +153,7 @@ func TestModelConfig_Structure(t *testing.T) {
 
 func TestMockModel_Implementation(t *testing.T) {
 	mockModel := &MockModel{}
-	
+
 	// Set up expectations
 	mockModel.On("Name").Return("test-model")
 	mockModel.On("GetCapabilities").Return(ModelCapabilities{
@@ -177,37 +177,37 @@ func TestMockModel_Implementation(t *testing.T) {
 
 	// Test the mock
 	assert.Equal(t, "test-model", mockModel.Name())
-	
+
 	caps := mockModel.GetCapabilities()
 	assert.Equal(t, 1000, caps.MaxTokens)
 	assert.False(t, caps.SupportsImages)
-	
+
 	output, err := mockModel.RunPrompt(ctx, input)
 	assert.NoError(t, err)
 	assert.Equal(t, "Hi there!", output.Response)
 	assert.Equal(t, 5, output.TokensUsed)
-	
+
 	mockModel.AssertExpectations(t)
 }
 
 func TestMockFactory_Implementation(t *testing.T) {
 	mockFactory := &MockFactory{}
 	mockModel := &MockModel{}
-	
+
 	config := ModelConfig{
 		Provider: "test",
 		Model:    "test-model",
 		APIKey:   "test-key",
 	}
-	
+
 	// Set up expectations
 	mockFactory.On("CreateModel", config).Return(mockModel, nil)
-	
+
 	// Test the mock
 	model, err := mockFactory.CreateModel(config)
 	assert.NoError(t, err)
 	assert.Equal(t, mockModel, model)
-	
+
 	mockFactory.AssertExpectations(t)
 }
 
@@ -289,17 +289,18 @@ func TestPromptInput_WithMultipleFiles(t *testing.T) {
 	}
 
 	assert.Len(t, input.Files, 3)
-	
+
 	codeFiles := 0
 	textFiles := 0
 	for _, file := range input.Files {
-		if file.Type == "code" {
+		switch file.Type {
+		case "code":
 			codeFiles++
-		} else if file.Type == "text" {
+		case "text":
 			textFiles++
 		}
 	}
-	
+
 	assert.Equal(t, 2, codeFiles)
 	assert.Equal(t, 1, textFiles)
 }
@@ -316,12 +317,12 @@ func TestPromptInput_WithMultipleMemoryEntries(t *testing.T) {
 	}
 
 	assert.Len(t, input.Memory, 3)
-	
+
 	typeCount := make(map[string]int)
 	for _, entry := range input.Memory {
 		typeCount[entry.Type]++
 	}
-	
+
 	assert.Equal(t, 1, typeCount["context"])
 	assert.Equal(t, 1, typeCount["decision"])
 	assert.Equal(t, 1, typeCount["summary"])
@@ -335,7 +336,7 @@ func TestModelCapabilities_FeatureChecks(t *testing.T) {
 		SupportsTools:     true,
 		SupportsStreaming: true,
 	}
-	
+
 	// Basic model
 	basicModel := ModelCapabilities{
 		MaxTokens:         4000,
@@ -343,13 +344,13 @@ func TestModelCapabilities_FeatureChecks(t *testing.T) {
 		SupportsTools:     false,
 		SupportsStreaming: false,
 	}
-	
+
 	// Test advanced model capabilities
 	assert.True(t, advancedModel.MaxTokens > 16000)
 	assert.True(t, advancedModel.SupportsImages)
 	assert.True(t, advancedModel.SupportsTools)
 	assert.True(t, advancedModel.SupportsStreaming)
-	
+
 	// Test basic model limitations
 	assert.True(t, basicModel.MaxTokens < 8000)
 	assert.False(t, basicModel.SupportsImages)
@@ -359,15 +360,15 @@ func TestModelCapabilities_FeatureChecks(t *testing.T) {
 
 func TestProviderNaming_Conventions(t *testing.T) {
 	providers := []string{"openai", "anthropic", "ollama", "mcp"}
-	
+
 	for _, provider := range providers {
 		t.Run(provider, func(t *testing.T) {
 			// Provider names should be lowercase
 			assert.Equal(t, strings.ToLower(provider), provider)
-			
+
 			// Provider names should not contain spaces
 			assert.NotContains(t, provider, " ")
-			
+
 			// Provider names should not be empty
 			assert.NotEmpty(t, provider)
 		})
@@ -376,7 +377,7 @@ func TestProviderNaming_Conventions(t *testing.T) {
 
 func TestMemoryEntry_Types(t *testing.T) {
 	validTypes := []string{"context", "decision", "summary"}
-	
+
 	for _, entryType := range validTypes {
 		t.Run(entryType, func(t *testing.T) {
 			entry := MemoryEntry{
@@ -384,7 +385,7 @@ func TestMemoryEntry_Types(t *testing.T) {
 				Content:   "Test content",
 				Timestamp: "2024-01-01",
 			}
-			
+
 			assert.Equal(t, entryType, entry.Type)
 			assert.NotEmpty(t, entry.Content)
 			assert.NotEmpty(t, entry.Timestamp)
@@ -394,7 +395,7 @@ func TestMemoryEntry_Types(t *testing.T) {
 
 func TestFileContent_Types(t *testing.T) {
 	validTypes := []string{"text", "code", "markdown", "json", "yaml"}
-	
+
 	for _, fileType := range validTypes {
 		t.Run(fileType, func(t *testing.T) {
 			file := FileContent{
@@ -402,7 +403,7 @@ func TestFileContent_Types(t *testing.T) {
 				Content: "test content",
 				Type:    fileType,
 			}
-			
+
 			assert.Equal(t, fileType, file.Type)
 			assert.Contains(t, file.Path, fileType)
 			assert.NotEmpty(t, file.Content)

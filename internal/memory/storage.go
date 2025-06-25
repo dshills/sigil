@@ -19,6 +19,11 @@ const (
 	sessionPrefix = "session_"
 	contextPrefix = "context_"
 	summaryPrefix = "summary_"
+
+	// Memory entry types
+	TypeSession = "session"
+	TypeContext = "context"
+	TypeSummary = "summary"
 )
 
 // Storage handles Markdown-based memory persistence
@@ -162,7 +167,7 @@ func (s *Storage) SearchEntries(query string, limit int) ([]MemoryEntry, error) 
 // GetRecentContext gets recent memory entries for context
 func (s *Storage) GetRecentContext(limit int) ([]model.MemoryEntry, error) {
 	filter := MemoryFilter{
-		Types: []string{"session", "context"},
+		Types: []string{TypeSession, TypeContext},
 		Limit: limit,
 	}
 
@@ -255,11 +260,11 @@ func (s *Storage) generateFilename(entry MemoryEntry) string {
 
 	var prefix string
 	switch entry.Type {
-	case "session":
+	case TypeSession:
 		prefix = sessionPrefix
-	case "context":
+	case TypeContext:
 		prefix = contextPrefix
-	case "summary":
+	case TypeSummary:
 		prefix = summaryPrefix
 	default:
 		prefix = "entry_"

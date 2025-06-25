@@ -355,13 +355,13 @@ func (c *ExplainCommand) detectProjectLanguage() string {
 		return "go"
 	}
 	if c.fileExists("package.json") {
-		return "javascript"
+		return LangJavaScript
 	}
 	if c.fileExists("requirements.txt") || c.fileExists("setup.py") {
-		return "python"
+		return LangPython
 	}
 	if c.fileExists("pom.xml") || c.fileExists("build.gradle") {
-		return "java"
+		return LangJava
 	}
 	return "text"
 }
@@ -385,17 +385,17 @@ func (c *ExplainCommand) detectLanguage(filePath string) string {
 	if strings.HasSuffix(filePath, ".go") {
 		return "go"
 	} else if strings.HasSuffix(filePath, ".js") || strings.HasSuffix(filePath, ".ts") {
-		return "javascript"
+		return LangJavaScript
 	} else if strings.HasSuffix(filePath, ".py") {
-		return "python"
+		return LangPython
 	} else if strings.HasSuffix(filePath, ".java") {
-		return "java"
+		return LangJava
 	} else if strings.HasSuffix(filePath, ".cpp") || strings.HasSuffix(filePath, ".c") {
-		return "c++"
+		return LangCPP
 	} else if strings.HasSuffix(filePath, ".rs") {
-		return "rust"
+		return LangRust
 	}
-	return "text"
+	return string(InputTypeText)
 }
 
 // CreateCobraCommand creates the cobra command for explain

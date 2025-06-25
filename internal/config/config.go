@@ -125,17 +125,53 @@ type GitConfig struct {
 
 // MCPConfig defines MCP server configuration
 type MCPConfig struct {
-	// Server URL
-	ServerURL string `yaml:"server_url"`
+	// Server URL (deprecated, use Servers instead)
+	ServerURL string `yaml:"server_url,omitempty"`
 
-	// Model name
-	Model string `yaml:"model"`
+	// Model name (deprecated, use Servers instead)
+	Model string `yaml:"model,omitempty"`
 
-	// API key (if required)
+	// API key (if required) (deprecated)
 	APIKey string `yaml:"api_key,omitempty"`
 
-	// Additional MCP-specific settings
+	// Additional MCP-specific settings (deprecated)
 	Settings map[string]interface{} `yaml:"settings,omitempty"`
+
+	// MCP server definitions
+	Servers []MCPServerConfig `yaml:"servers,omitempty"`
+}
+
+// MCPServerConfig defines a single MCP server
+type MCPServerConfig struct {
+	// Server name (unique identifier)
+	Name string `yaml:"name"`
+
+	// Command to execute
+	Command string `yaml:"command"`
+
+	// Command arguments
+	Args []string `yaml:"args,omitempty"`
+
+	// Environment variables
+	Env map[string]string `yaml:"env,omitempty"`
+
+	// Transport type (stdio, sse, websocket)
+	Transport string `yaml:"transport,omitempty"`
+
+	// Working directory
+	WorkingDir string `yaml:"working_dir,omitempty"`
+
+	// Auto-restart on failure
+	AutoRestart bool `yaml:"auto_restart,omitempty"`
+
+	// Maximum restart attempts
+	MaxRestarts int `yaml:"max_restarts,omitempty"`
+
+	// Server-specific settings
+	Settings struct {
+		Timeout    string `yaml:"timeout,omitempty"`
+		MaxRetries int    `yaml:"max_retries,omitempty"`
+	} `yaml:"settings,omitempty"`
 }
 
 // Default configuration values

@@ -149,7 +149,7 @@ func TestExecutor_isCommandAllowed(t *testing.T) {
 
 func TestExecutor_applyChanges(t *testing.T) {
 	t.Skip("applyChanges requires actual file system operations - testing structure only")
-	
+
 	executor := &Executor{}
 
 	// Test unknown operation (this doesn't require file operations)
@@ -207,7 +207,7 @@ func TestExecutor_executeValidation(t *testing.T) {
 
 func TestExecutor_GetWorktrees(t *testing.T) {
 	t.Skip("GetWorktrees requires complex mocking - testing structure only")
-	
+
 	// Test the concept without complex mocking
 	expectedWorktrees := []*Worktree{
 		{ID: "wt1", Path: "/tmp/wt1"},
@@ -221,7 +221,7 @@ func TestExecutor_GetWorktrees(t *testing.T) {
 
 func TestExecutor_Cleanup(t *testing.T) {
 	t.Skip("Cleanup requires complex mocking - testing structure only")
-	
+
 	// Test that cleanup would work structurally
 	expectedWorktrees := []*Worktree{
 		{ID: "wt1", Path: "/tmp/wt1"},
@@ -356,10 +356,10 @@ func TestExecutionResponse_Methods(t *testing.T) {
 
 	t.Run("failed response", func(t *testing.T) {
 		response := ExecutionResponse{
-			Status:     StatusFailed,
-			StartTime:  startTime,
-			EndTime:    endTime,
-			Error:      "Build failed",
+			Status:    StatusFailed,
+			StartTime: startTime,
+			EndTime:   endTime,
+			Error:     "Build failed",
 		}
 
 		assert.False(t, response.Success())
@@ -376,7 +376,7 @@ func TestExecutionResponse_Methods(t *testing.T) {
 
 		assert.False(t, response.Success())
 		duration := response.Duration()
-		assert.True(t, duration > 0) // Should be time since start
+		assert.True(t, duration > 0)           // Should be time since start
 		assert.True(t, duration < time.Minute) // Reasonable upper bound for test
 	})
 }
@@ -537,7 +537,7 @@ func TestExecutor_ConfigDefaults(t *testing.T) {
 
 func TestExecutor_ApplyChangesErrorHandling(t *testing.T) {
 	executor := &Executor{}
-	
+
 	// Test with file operation that should trigger delete path
 	tempDir, err := os.MkdirTemp("", "sigil-executor-test-*")
 	require.NoError(t, err)
@@ -562,7 +562,7 @@ func TestExecutor_ApplyChangesErrorHandling(t *testing.T) {
 		},
 	}
 
-	err = executor.applyChanges(worktree, request)
+	_ = executor.applyChanges(worktree, request)
 	// May succeed or fail depending on path resolution, but shouldn't panic
 	// The important thing is that the code path is exercised
 }
@@ -570,7 +570,7 @@ func TestExecutor_ApplyChangesErrorHandling(t *testing.T) {
 func TestExecutor_IntegrationStructure(t *testing.T) {
 	// Test that all the components work together structurally
 	config := DefaultExecutorConfig()
-	
+
 	// Verify config has all required fields
 	assert.NotZero(t, config.Timeout)
 	assert.NotZero(t, config.MaxWorktrees)

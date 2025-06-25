@@ -16,6 +16,28 @@ import (
 	"github.com/dshills/sigil/internal/logger"
 )
 
+// Output format constants
+const (
+	FormatMarkdown = "markdown"
+	FormatHTML     = "html"
+)
+
+// Programming language constants
+const (
+	LangJavaScript = "javascript"
+	LangPython     = "python"
+	LangJava       = "java"
+	LangCPP        = "c++"
+	LangRust       = "rust"
+)
+
+// Framework constants
+const (
+	FrameworkNextJS  = "next.js"
+	FrameworkAngular = "angular"
+	FrameworkVue     = "vue"
+)
+
 // SummarizeCommand handles code summarization operations
 type SummarizeCommand struct {
 	*BaseCommand
@@ -33,7 +55,7 @@ func NewSummarizeCommand() *SummarizeCommand {
 	return &SummarizeCommand{
 		BaseCommand: NewBaseCommand("summarize", "Generate code summaries with AI analysis",
 			"Generate comprehensive summaries of code files and projects using AI analysis."),
-		Format:    "markdown",
+		Format:    FormatMarkdown,
 		startTime: time.Now(),
 	}
 }
@@ -76,7 +98,7 @@ func (c *SummarizeCommand) validateInputs() error {
 		}
 	}
 
-	validFormats := []string{"markdown", "text", "json", "html", "yaml"}
+	validFormats := []string{FormatMarkdown, string(InputTypeText), string(OutputFormatJSON), FormatHTML, "yaml"}
 	formatValid := false
 	for _, format := range validFormats {
 		if c.Format == format {
@@ -240,13 +262,13 @@ func (c *SummarizeCommand) outputResult(result *agent.OrchestrationResult) error
 // formatOutput formats the summary based on the requested format
 func (c *SummarizeCommand) formatOutput(content string) (string, error) {
 	switch c.Format {
-	case "markdown":
+	case FormatMarkdown:
 		return c.formatMarkdown(content), nil
-	case "text":
+	case string(InputTypeText):
 		return c.formatText(content), nil
-	case "json":
+	case string(OutputFormatJSON):
 		return c.formatJSON(content), nil
-	case "html":
+	case FormatHTML:
 		return c.formatHTML(content), nil
 	case "yaml":
 		return c.formatYAML(content), nil
@@ -383,27 +405,27 @@ func (c *SummarizeCommand) detectProjectLanguage() string {
 		return "go"
 	}
 	if c.fileExists("package.json") {
-		return "javascript"
+		return LangJavaScript
 	}
 	if c.fileExists("requirements.txt") || c.fileExists("setup.py") {
-		return "python"
+		return LangPython
 	}
 	if c.fileExists("pom.xml") || c.fileExists("build.gradle") {
-		return "java"
+		return LangJava
 	}
-	return "text"
+	return string(InputTypeText)
 }
 
 // detectFramework detects the framework being used
 func (c *SummarizeCommand) detectFramework() string {
 	if c.fileExists("next.config.js") {
-		return "next.js"
+		return FrameworkNextJS
 	}
 	if c.fileExists("angular.json") {
-		return "angular"
+		return FrameworkAngular
 	}
 	if c.fileExists("vue.config.js") {
-		return "vue"
+		return FrameworkVue
 	}
 	return ""
 }
@@ -413,17 +435,17 @@ func (c *SummarizeCommand) detectLanguage(filePath string) string {
 	if strings.HasSuffix(filePath, ".go") {
 		return "go"
 	} else if strings.HasSuffix(filePath, ".js") || strings.HasSuffix(filePath, ".ts") {
-		return "javascript"
+		return LangJavaScript
 	} else if strings.HasSuffix(filePath, ".py") {
-		return "python"
+		return LangPython
 	} else if strings.HasSuffix(filePath, ".java") {
-		return "java"
+		return LangJava
 	} else if strings.HasSuffix(filePath, ".cpp") || strings.HasSuffix(filePath, ".c") {
-		return "c++"
+		return LangCPP
 	} else if strings.HasSuffix(filePath, ".rs") {
-		return "rust"
+		return LangRust
 	}
-	return "text"
+	return string(InputTypeText)
 }
 
 // CreateCobraCommand creates the cobra command for summarize

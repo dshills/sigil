@@ -74,11 +74,7 @@ func initGitRepo(dir string) error {
 		return err
 	}
 
-	if err := runGitCommand("commit", "-m", "Initial commit"); err != nil {
-		return err
-	}
-
-	return nil
+	return runGitCommand("commit", "-m", "Initial commit")
 }
 
 // runGitCommand runs a git command
@@ -90,7 +86,7 @@ func runGitCommand(args ...string) error {
 
 func TestNewWorktreeManager(t *testing.T) {
 	t.Skip("NewWorktreeManager requires git repository - testing structure only")
-	
+
 	// Test would create a git repository and worktree manager
 	// This is skipped because it requires actual git operations
 	// The structure and logic are tested through other unit tests
@@ -132,7 +128,7 @@ func TestWorktreeManager_CreateWorktree(t *testing.T) {
 
 func TestWorktreeManager_GetWorktree(t *testing.T) {
 	t.Skip("GetWorktree requires git repository - testing structure only")
-	
+
 	// Test structure without requiring git operations
 	manager := &WorktreeManager{
 		worktrees: make(map[string]*Worktree),
@@ -231,7 +227,7 @@ func TestWorktreeManager_CleanupWorktree(t *testing.T) {
 
 func TestWorktreeManager_CleanupOldWorktrees(t *testing.T) {
 	t.Skip("CleanupOldWorktrees requires git operations - testing logic only")
-	
+
 	manager := &WorktreeManager{
 		worktrees: make(map[string]*Worktree),
 	}
@@ -262,7 +258,7 @@ func TestWorktreeManager_CleanupOldWorktrees(t *testing.T) {
 			toDelete = append(toDelete, id)
 		}
 	}
-	
+
 	// Should identify the old worktree for cleanup
 	assert.Len(t, toDelete, 1)
 	assert.Contains(t, toDelete, "old-123")
@@ -358,7 +354,7 @@ func TestWorktree_ReadFile(t *testing.T) {
 
 func TestWorktree_GetChanges(t *testing.T) {
 	t.Skip("GetChanges requires git repository - testing structure only")
-	
+
 	tempDir, err := os.MkdirTemp("", "sigil-worktree-changes-test-*")
 	require.NoError(t, err)
 	defer os.RemoveAll(tempDir)
@@ -404,7 +400,7 @@ func TestWorktree_Cleanup(t *testing.T) {
 	// Test the cleanup delegation concept
 	assert.Equal(t, "test-123", worktree.ID)
 	assert.NotNil(t, worktree.manager)
-	
+
 	// Test the mock separately
 	err := mockManager.CleanupWorktree("test-123")
 	assert.NoError(t, err)

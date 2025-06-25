@@ -117,21 +117,21 @@ func (c *DiffCommand) getCommitDiff(gitRepo *git.Repository, commit string) (str
 	if commit == "" {
 		return "", errors.New(errors.ErrorTypeInput, "getCommitDiff", "commit hash cannot be empty")
 	}
-	
+
 	// Use git show to get the diff for a specific commit
 	cmd := exec.Command("git", "show", "--format=", commit)
 	cmd.Dir = gitRepo.Path
-	
+
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		// Check if it's a command not found error
 		if strings.Contains(err.Error(), "executable file not found") {
 			return "", errors.New(errors.ErrorTypeInternal, "getCommitDiff", "git command not found in PATH")
 		}
-		return "", errors.Wrap(err, errors.ErrorTypeGit, "getCommitDiff", 
+		return "", errors.Wrap(err, errors.ErrorTypeGit, "getCommitDiff",
 			fmt.Sprintf("failed to get diff for commit %s: %s", commit, string(output)))
 	}
-	
+
 	return string(output), nil
 }
 
@@ -141,19 +141,19 @@ func (c *DiffCommand) getBranchDiff(gitRepo *git.Repository, branch string) (str
 	if branch == "" {
 		return "", errors.New(errors.ErrorTypeInput, "getBranchDiff", "branch name cannot be empty")
 	}
-	
+
 	// Get diff between the specified branch and current HEAD
 	// Using three dots (...) to show changes on HEAD since the branches diverged
 	cmd := exec.Command("git", "diff", fmt.Sprintf("%s...HEAD", branch))
 	cmd.Dir = gitRepo.Path
-	
+
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		// Check if it's a command not found error
 		if strings.Contains(err.Error(), "executable file not found") {
 			return "", errors.New(errors.ErrorTypeInternal, "getBranchDiff", "git command not found in PATH")
 		}
-		
+
 		// Check if the branch exists
 		checkCmd := exec.Command("git", "rev-parse", "--verify", branch)
 		checkCmd.Dir = gitRepo.Path
@@ -164,7 +164,7 @@ func (c *DiffCommand) getBranchDiff(gitRepo *git.Repository, branch string) (str
 		return "", errors.Wrap(err, errors.ErrorTypeGit, "getBranchDiff",
 			fmt.Sprintf("failed to get diff for branch %s: %s", branch, string(output)))
 	}
-	
+
 	return string(output), nil
 }
 
@@ -175,13 +175,13 @@ func (c *DiffCommand) getFileDiff(gitRepo *git.Repository, files []string) (stri
 		Staged: c.Staged,
 		Files:  files,
 	}
-	
+
 	diffContent, err := gitRepo.Diff(opts)
 	if err != nil {
 		return "", errors.Wrap(err, errors.ErrorTypeGit, "getFileDiff",
 			fmt.Sprintf("failed to get diff for files %v", files))
 	}
-	
+
 	// Check if any of the files don't exist
 	if diffContent == "" {
 		for _, file := range files {
@@ -193,7 +193,7 @@ func (c *DiffCommand) getFileDiff(gitRepo *git.Repository, files []string) (stri
 		// Files exist but no changes
 		return "", nil
 	}
-	
+
 	return diffContent, nil
 }
 
@@ -512,13 +512,13 @@ func (c *DiffCommand) detectProjectLanguage() string {
 		return "go"
 	}
 	if c.fileExists("package.json") {
-		return "javascript"
+		return LangJavaScript
 	}
 	if c.fileExists("requirements.txt") || c.fileExists("setup.py") {
-		return "python"
+		return LangPython
 	}
 	if c.fileExists("pom.xml") || c.fileExists("build.gradle") {
-		return "java"
+		return LangJava
 	}
 	return "text"
 }
@@ -526,13 +526,13 @@ func (c *DiffCommand) detectProjectLanguage() string {
 // detectFramework detects the framework being used
 func (c *DiffCommand) detectFramework() string {
 	if c.fileExists("next.config.js") {
-		return "next.js"
+		return FrameworkNextJS
 	}
 	if c.fileExists("angular.json") {
-		return "angular"
+		return FrameworkAngular
 	}
 	if c.fileExists("vue.config.js") {
-		return "vue"
+		return FrameworkVue
 	}
 	return ""
 }

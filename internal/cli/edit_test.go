@@ -14,7 +14,7 @@ import (
 func TestNewEditCommand(t *testing.T) {
 	cmd := NewEditCommand()
 	assert.NotNil(t, cmd)
-	assert.Equal(t, "edit", cmd.BaseCommand.Name)
+	assert.Equal(t, "edit", cmd.Name)
 	assert.NotZero(t, cmd.startTime)
 }
 
