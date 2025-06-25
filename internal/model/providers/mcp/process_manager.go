@@ -7,6 +7,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/dshills/sigil/internal/logger"
 )
 
 // ProcessManager manages MCP server processes
@@ -208,7 +210,23 @@ func (pm *ProcessManager) StartServer(ctx context.Context, config ServerConfig) 
 
 	// Create protocol handler
 	protocol := NewProtocolHandler(transport)
-	transport.(*StdioTransport).SetMessageHandler(protocol.ProcessMessage)
+
+	// Configure transport for production use
+	if stdioTransport, ok := transport.(*StdioTransport); ok {
+		stdioTransport.SetMessageHandler(protocol.ProcessMessage)
+
+		// Set up error callback for automatic restart
+		stdioTransport.SetErrorCallback(func(err error) {
+			logger.Warn("MCP server transport error", "server", config.Name, "error", err)
+		})
+
+		// Configure reconnection based on server config
+		maxReconnects := 3
+		if config.MaxRestarts > 0 {
+			maxReconnects = config.MaxRestarts
+		}
+		stdioTransport.SetReconnectConfig(maxReconnects, 2*time.Second)
+	}
 
 	// Create managed server
 	server := &ManagedServer{

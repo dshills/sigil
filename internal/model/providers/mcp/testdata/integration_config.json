@@ -1,0 +1,39 @@
+{
+  "echo-json": {
+    "command": "echo",
+    "args": ["{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{\"capabilities\":{\"tools\":true,\"resources\":true}}}"],
+    "env": {},
+    "timeout": "5s",
+    "skipIfMissing": true
+  },
+  "python-server": {
+    "command": "python3",
+    "args": ["-c", "import json, sys; print(json.dumps({'jsonrpc':'2.0','id':1,'result':{'capabilities':{'tools':True}}})); sys.stdout.flush()"],
+    "env": {},
+    "timeout": "10s",
+    "skipIfMissing": true
+  },
+  "node-server": {
+    "command": "node",
+    "args": ["-e", "console.log(JSON.stringify({jsonrpc:'2.0',id:1,result:{capabilities:{tools:true}}}))"],
+    "env": {},
+    "timeout": "10s",
+    "skipIfMissing": true
+  },
+  "github-mcp": {
+    "command": "npx",
+    "args": ["@modelcontextprotocol/server-github"],
+    "env": {
+      "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+    },
+    "timeout": "15s",
+    "skipIfMissing": true
+  },
+  "filesystem-mcp": {
+    "command": "npx",
+    "args": ["@modelcontextprotocol/server-filesystem", "/tmp"],
+    "env": {},
+    "timeout": "15s",
+    "skipIfMissing": true
+  }
+}
