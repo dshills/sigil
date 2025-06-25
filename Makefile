@@ -29,7 +29,17 @@ build:
 .PHONY: test
 test:
 	@echo "Running tests..."
-	@$(GO) test -v ./...
+	@if $(GO) test -coverprofile=coverage.out ./... > test.log 2>&1; then \
+		echo "All tests passed!"; \
+		rm -f test.log; \
+	else \
+		grep -E "(FAIL|^--- FAIL:|Error:|panic:)" test.log || true; \
+		rm -f test.log; \
+		exit 1; \
+	fi
+	@echo ""
+	@echo "Coverage Summary:"
+	@$(GO) tool cover -func=coverage.out | grep total || echo "No coverage data"
 
 # Run tests with coverage
 .PHONY: test-coverage
@@ -63,7 +73,7 @@ clean:
 	@echo "Cleaning..."
 	@rm -f $(BINARY_NAME)
 	@rm -rf $(BUILD_DIR) $(DIST_DIR)
-	@rm -f coverage.out coverage.html
+	@rm -f coverage.out coverage.html test.log
 
 # Install dependencies
 .PHONY: deps
