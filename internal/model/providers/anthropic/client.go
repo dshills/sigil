@@ -186,9 +186,9 @@ func (m *Model) GetCapabilities() model.ModelCapabilities {
 
 	return model.ModelCapabilities{
 		MaxTokens:         maxTokens,
-		SupportsImages:    strings.Contains(m.modelName, "claude-3"), // Claude-3 supports vision
+		SupportsImages:    strings.Contains(m.modelName, "claude-3"), // Claude-3 models support vision
 		SupportsTools:     true,
-		SupportsStreaming: false, // TODO: Add streaming support
+		SupportsStreaming: false, // Streaming support could be added in future
 	}
 }
 

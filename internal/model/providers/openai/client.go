@@ -166,18 +166,25 @@ func (m *Model) GetCapabilities() model.ModelCapabilities {
 	maxTokens := 4096 // Default for GPT-3.5-turbo
 
 	// Adjust based on model
+	var supportsVision bool
 	switch m.modelName {
 	case "gpt-4", "gpt-4-turbo", "gpt-4-turbo-preview":
 		maxTokens = 8192
+	case "gpt-4-vision-preview", "gpt-4-turbo-vision-preview":
+		maxTokens = 8192
+		supportsVision = true
+	case "gpt-4o", "gpt-4o-mini":
+		maxTokens = 8192
+		supportsVision = true
 	case "gpt-3.5-turbo-16k":
 		maxTokens = 16384
 	}
 
 	return model.ModelCapabilities{
 		MaxTokens:         maxTokens,
-		SupportsImages:    false, // TODO: Add vision model support
+		SupportsImages:    supportsVision,
 		SupportsTools:     true,
-		SupportsStreaming: false, // TODO: Add streaming support
+		SupportsStreaming: false, // Streaming support could be added in future
 	}
 }
 
