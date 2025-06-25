@@ -1,0 +1,31 @@
+# Basic Sigil configuration
+# This is a minimal configuration file to get started
+
+models:
+  # Lead model for primary processing
+  lead: "openai:gpt-4"
+  
+  # Reviewer models for validation (optional)
+  reviewers: []
+  
+  # Model provider configurations
+  configs:
+    openai:
+      # API key from environment variable
+      api_key: ${OPENAI_API_KEY}
+
+# Memory settings
+memory:
+  enabled: true
+  max_entries: 100
+  
+# Basic rules
+rules:
+  style:
+    - identifier: "go-fmt"
+      description: "Code must be formatted with gofmt"
+      severity: "error"
+      
+# Logging
+logging:
+  level: "info"

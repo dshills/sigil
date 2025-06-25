@@ -1,0 +1,53 @@
+# Git
+.git
+.gitignore
+
+# Go
+vendor/
+*.test
+*.out
+
+# Build artifacts
+build/
+dist/
+bin/
+sigil
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation
+*.md
+!README.md
+!CLAUDE.md
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Environment
+.env
+.env.*
+
+# Logs
+*.log
+
+# Test artifacts
+coverage.html
+c.out
+
+# Examples (can be excluded to reduce image size)
+examples/
+
+# Temporary files
+tmp/
+temp/

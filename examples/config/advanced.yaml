@@ -1,0 +1,131 @@
+# Advanced Sigil configuration
+# This configuration demonstrates all available options
+
+# Model configuration
+models:
+  # Lead model for primary processing
+  lead: "openai:gpt-4"
+  
+  # Multiple reviewer models for comprehensive validation
+  reviewers:
+    - "anthropic:claude-3-sonnet-20241022"
+    - "openai:gpt-4-turbo-preview"
+  
+  # Model provider configurations
+  configs:
+    openai:
+      api_key: ${OPENAI_API_KEY}
+      endpoint: "https://api.openai.com/v1"
+      options:
+        temperature: 0.7
+        max_tokens: 4000
+        
+    anthropic:
+      api_key: ${ANTHROPIC_API_KEY}
+      endpoint: "https://api.anthropic.com/v1"
+      options:
+        max_tokens: 4000
+        
+    ollama:
+      endpoint: "http://localhost:11434"
+      options:
+        temperature: 0.5
+        
+    mcp:
+      endpoint: "http://localhost:8080"
+      api_key: ${MCP_API_KEY}
+
+# Memory configuration
+memory:
+  enabled: true
+  max_entries: 500
+  retention_days: 90
+  index_enabled: true
+  
+# Sandbox configuration
+sandbox:
+  enabled: true
+  timeout: 300 # seconds
+  max_concurrent: 3
+  cleanup_after: 3600 # seconds
+  
+# Validation rules
+rules:
+  # Style rules
+  style:
+    - identifier: "naming-convention"
+      description: "Use camelCase for variables, PascalCase for types"
+      severity: "warning"
+      
+    - identifier: "line-length"
+      description: "Maximum line length of 120 characters"
+      severity: "info"
+      config:
+        max_length: 120
+        
+  # Security rules
+  security:
+    - identifier: "no-hardcoded-secrets"
+      description: "No hardcoded API keys or passwords"
+      severity: "error"
+      
+    - identifier: "sql-injection"
+      description: "Prevent SQL injection vulnerabilities"
+      severity: "error"
+      
+  # Performance rules
+  performance:
+    - identifier: "no-n-plus-one"
+      description: "Avoid N+1 query problems"
+      severity: "warning"
+      
+    - identifier: "efficient-loops"
+      description: "Use efficient loop constructs"
+      severity: "info"
+
+# Agent configuration
+agents:
+  lead:
+    timeout: 120
+    max_retries: 3
+    
+  reviewers:
+    parallel: true
+    min_consensus: 2
+    timeout: 60
+    
+# Git configuration
+git:
+  auto_stage: false
+  sign_commits: false
+  default_branch: "main"
+  
+# Output configuration
+output:
+  default_format: "markdown"
+  syntax_highlighting: true
+  line_numbers: true
+  
+# Logging configuration
+logging:
+  level: "debug"
+  format: "json"
+  output: "stderr"
+  file: ".sigil/sigil.log"
+  
+# Telemetry (opt-in)
+telemetry:
+  enabled: false
+  endpoint: "https://telemetry.sigil.dev"
+  
+# Plugins (future feature)
+plugins:
+  enabled: false
+  directory: ".sigil/plugins"
+  
+# Advanced features
+features:
+  autonomous_mode: false
+  interactive_mode: true
+  streaming_output: true
+  progress_indicators: true

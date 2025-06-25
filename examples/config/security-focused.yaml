@@ -1,0 +1,154 @@
+# Security-focused configuration
+# This configuration emphasizes security and compliance
+
+models:
+  # Use models with strong security awareness
+  lead: "anthropic:claude-3-sonnet-20241022"
+  
+  # Multiple reviewers for security validation
+  reviewers:
+    - "openai:gpt-4"
+    - "anthropic:claude-3-sonnet-20241022"
+  
+  configs:
+    openai:
+      api_key: ${OPENAI_API_KEY}
+      # Use more conservative temperature for security tasks
+      options:
+        temperature: 0.3
+        max_tokens: 4000
+        
+    anthropic:
+      api_key: ${ANTHROPIC_API_KEY}
+      options:
+        temperature: 0.2
+        max_tokens: 4000
+
+# Strict security rules
+rules:
+  security:
+    # Authentication & Authorization
+    - identifier: "secure-auth"
+      description: "Use secure authentication methods"
+      severity: "error"
+      patterns:
+        - "basic auth without TLS"
+        - "hardcoded credentials"
+        - "weak password requirements"
+    
+    # Cryptography
+    - identifier: "strong-crypto"
+      description: "Use strong cryptographic algorithms"
+      severity: "error"
+      config:
+        min_key_size: 2048
+        allowed_algorithms:
+          - "AES-256"
+          - "RSA-2048"
+          - "Ed25519"
+    
+    # Input validation
+    - identifier: "input-validation"
+      description: "Validate all user inputs"
+      severity: "error"
+      checks:
+        - sql_injection
+        - xss
+        - command_injection
+        - path_traversal
+    
+    # Secrets management
+    - identifier: "no-secrets"
+      description: "No secrets in code"
+      severity: "error"
+      patterns:
+        - "api_key"
+        - "password"
+        - "secret"
+        - "token"
+        - "private_key"
+    
+    # Dependencies
+    - identifier: "secure-dependencies"
+      description: "Check for vulnerable dependencies"
+      severity: "warning"
+      
+  # Privacy rules
+  privacy:
+    - identifier: "pii-protection"
+      description: "Protect personally identifiable information"
+      severity: "error"
+      patterns:
+        - "SSN"
+        - "credit card"
+        - "email in logs"
+        
+    - identifier: "gdpr-compliance"
+      description: "GDPR compliance checks"
+      severity: "warning"
+      
+  # Compliance rules
+  compliance:
+    - identifier: "license-headers"
+      description: "Ensure proper license headers"
+      severity: "warning"
+      
+    - identifier: "audit-logging"
+      description: "Maintain audit logs for sensitive operations"
+      severity: "error"
+
+# Security-focused agent configuration
+agents:
+  lead:
+    prompts:
+      security_focus: true
+      assume_hostile_input: true
+      
+  reviewers:
+    min_consensus: 2 # Require agreement from multiple reviewers
+    security_specialist: true
+
+# Sandbox configuration with security emphasis
+sandbox:
+  enabled: true
+  isolation_level: "strict"
+  network_access: false
+  filesystem_access: "readonly"
+  resource_limits:
+    memory: "512MB"
+    cpu: "1.0"
+    timeout: 60
+
+# Audit logging
+audit:
+  enabled: true
+  log_file: ".sigil/audit.log"
+  events:
+    - "code_modification"
+    - "secret_detection"
+    - "vulnerability_found"
+    - "sandbox_execution"
+  
+# Output sanitization
+output:
+  sanitize_secrets: true
+  redact_patterns:
+    - "api_key=.*"
+    - "password=.*"
+    - "token=.*"
+  
+# Git security
+git:
+  sign_commits: true
+  verify_signatures: true
+  protected_branches:
+    - "main"
+    - "master"
+    - "production"
+  
+# Additional security features
+features:
+  secret_scanning: true
+  dependency_check: true
+  sast_integration: true
+  container_scanning: true

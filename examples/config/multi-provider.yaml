@@ -1,0 +1,124 @@
+# Multi-provider configuration
+# This example shows how to use multiple LLM providers
+
+models:
+  # Use GPT-4 as the lead model
+  lead: "openai:gpt-4"
+  
+  # Use different providers for review
+  reviewers:
+    - "anthropic:claude-3-sonnet-20241022"
+    - "ollama:codellama"
+    - "mcp:code-reviewer"
+  
+  # Provider-specific configurations
+  configs:
+    # OpenAI configuration
+    openai:
+      api_key: ${OPENAI_API_KEY}
+      options:
+        temperature: 0.7
+        max_tokens: 4000
+        model_params:
+          presence_penalty: 0.1
+          frequency_penalty: 0.1
+    
+    # Anthropic configuration
+    anthropic:
+      api_key: ${ANTHROPIC_API_KEY}
+      options:
+        max_tokens: 4000
+        temperature: 0.5
+    
+    # Ollama configuration (local models)
+    ollama:
+      endpoint: ${OLLAMA_HOST:-http://localhost:11434}
+      options:
+        temperature: 0.3
+        # Specific options for different models
+        model_configs:
+          codellama:
+            context_length: 16384
+            gpu_layers: 35
+          mistral:
+            context_length: 8192
+            gpu_layers: 30
+    
+    # MCP configuration (custom model server)
+    mcp:
+      endpoint: ${MCP_ENDPOINT:-http://localhost:8080}
+      api_key: ${MCP_API_KEY}
+      options:
+        timeout: 60
+        retry_count: 3
+
+# Model selection strategy
+model_selection:
+  # Strategy for choosing models based on task
+  strategy: "task-based"
+  
+  # Task-specific model assignments
+  tasks:
+    code_generation:
+      primary: "openai:gpt-4"
+      fallback: "anthropic:claude-3-sonnet-20241022"
+      
+    code_review:
+      primary: "anthropic:claude-3-sonnet-20241022"
+      fallback: "openai:gpt-4"
+      
+    documentation:
+      primary: "openai:gpt-4"
+      fallback: "ollama:mistral"
+      
+    explanation:
+      primary: "anthropic:claude-3-sonnet-20241022"
+      fallback: "openai:gpt-3.5-turbo"
+  
+  # Fallback behavior
+  fallback:
+    enabled: true
+    max_attempts: 2
+    backoff_seconds: 5
+
+# Cost optimization
+cost_optimization:
+  enabled: true
+  
+  # Use cheaper models for simple tasks
+  tiered_models:
+    simple: "openai:gpt-3.5-turbo"
+    moderate: "openai:gpt-4"
+    complex: "openai:gpt-4-turbo-preview"
+  
+  # Task complexity detection
+  complexity_detection:
+    enabled: true
+    factors:
+      - file_count
+      - line_count
+      - language_complexity
+      
+# Load balancing
+load_balancing:
+  enabled: true
+  strategy: "round-robin"
+  
+  # Provider weights (for weighted round-robin)
+  weights:
+    openai: 3
+    anthropic: 2
+    ollama: 1
+    mcp: 1
+
+# Provider health checks
+health_checks:
+  enabled: true
+  interval: 300 # seconds
+  timeout: 10
+  
+  # Mark provider as unhealthy after N failures
+  failure_threshold: 3
+  
+  # Re-enable provider after N seconds
+  recovery_time: 600
