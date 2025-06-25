@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"os/exec"
 	"strings"
 	"time"
 
@@ -112,23 +113,88 @@ func (c *DiffCommand) getDiffContent(gitRepo *git.Repository) (string, error) {
 
 // getCommitDiff gets diff for a specific commit
 func (c *DiffCommand) getCommitDiff(gitRepo *git.Repository, commit string) (string, error) {
-	// Implementation would use git show or similar
-	// For now, return a placeholder
-	return fmt.Sprintf("Diff for commit %s would be retrieved here", commit), nil
+	// Validate commit parameter
+	if commit == "" {
+		return "", errors.New(errors.ErrorTypeInput, "getCommitDiff", "commit hash cannot be empty")
+	}
+	
+	// Use git show to get the diff for a specific commit
+	cmd := exec.Command("git", "show", "--format=", commit)
+	cmd.Dir = gitRepo.Path
+	
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		// Check if it's a command not found error
+		if strings.Contains(err.Error(), "executable file not found") {
+			return "", errors.New(errors.ErrorTypeInternal, "getCommitDiff", "git command not found in PATH")
+		}
+		return "", errors.Wrap(err, errors.ErrorTypeGit, "getCommitDiff", 
+			fmt.Sprintf("failed to get diff for commit %s: %s", commit, string(output)))
+	}
+	
+	return string(output), nil
 }
 
 // getBranchDiff gets diff between current branch and specified branch
 func (c *DiffCommand) getBranchDiff(gitRepo *git.Repository, branch string) (string, error) {
-	// Implementation would use git diff branch..HEAD or similar
-	// For now, return a placeholder
-	return fmt.Sprintf("Diff between current branch and %s would be retrieved here", branch), nil
+	// Validate branch parameter
+	if branch == "" {
+		return "", errors.New(errors.ErrorTypeInput, "getBranchDiff", "branch name cannot be empty")
+	}
+	
+	// Get diff between the specified branch and current HEAD
+	// Using three dots (...) to show changes on HEAD since the branches diverged
+	cmd := exec.Command("git", "diff", fmt.Sprintf("%s...HEAD", branch))
+	cmd.Dir = gitRepo.Path
+	
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		// Check if it's a command not found error
+		if strings.Contains(err.Error(), "executable file not found") {
+			return "", errors.New(errors.ErrorTypeInternal, "getBranchDiff", "git command not found in PATH")
+		}
+		
+		// Check if the branch exists
+		checkCmd := exec.Command("git", "rev-parse", "--verify", branch)
+		checkCmd.Dir = gitRepo.Path
+		if checkErr := checkCmd.Run(); checkErr != nil {
+			return "", errors.New(errors.ErrorTypeInput, "getBranchDiff",
+				fmt.Sprintf("branch '%s' does not exist", branch))
+		}
+		return "", errors.Wrap(err, errors.ErrorTypeGit, "getBranchDiff",
+			fmt.Sprintf("failed to get diff for branch %s: %s", branch, string(output)))
+	}
+	
+	return string(output), nil
 }
 
 // getFileDiff gets diff for specific files
 func (c *DiffCommand) getFileDiff(gitRepo *git.Repository, files []string) (string, error) {
-	// Implementation would use git diff -- files...
-	// For now, return a placeholder
-	return fmt.Sprintf("Diff for files %v would be retrieved here", files), nil
+	// Use the existing Diff method from the git package
+	opts := git.DiffOptions{
+		Staged: c.Staged,
+		Files:  files,
+	}
+	
+	diffContent, err := gitRepo.Diff(opts)
+	if err != nil {
+		return "", errors.Wrap(err, errors.ErrorTypeGit, "getFileDiff",
+			fmt.Sprintf("failed to get diff for files %v", files))
+	}
+	
+	// Check if any of the files don't exist
+	if diffContent == "" {
+		for _, file := range files {
+			if !c.fileExists(file) {
+				return "", errors.New(errors.ErrorTypeInput, "getFileDiff",
+					fmt.Sprintf("file does not exist: %s", file))
+			}
+		}
+		// Files exist but no changes
+		return "", nil
+	}
+	
+	return diffContent, nil
 }
 
 // createDiffTask creates a task for diff analysis
