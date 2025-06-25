@@ -23,7 +23,7 @@ all: build
 .PHONY: build
 build:
 	@echo "Building $(BINARY_NAME)..."
-	@$(GO) build $(LDFLAGS) -o $(BINARY_NAME) cmd/sigil/main.go
+	@$(GO) build $(LDFLAGS) -o ./build/$(BINARY_NAME) cmd/sigil/main.go
 
 # Run tests
 .PHONY: test

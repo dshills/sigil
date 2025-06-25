@@ -21,11 +21,11 @@ func TestNewEditCommand(t *testing.T) {
 func TestEditCommand_CreateCobraCommand(t *testing.T) {
 	cmd := NewEditCommand()
 	cobraCmd := cmd.CreateCobraCommand()
-	
+
 	assert.NotNil(t, cobraCmd)
 	assert.Equal(t, "edit", cobraCmd.Use[:4])
 	assert.Contains(t, cobraCmd.Short, "Edit files with intelligent code transformations")
-	
+
 	// Check flags
 	assert.NotNil(t, cobraCmd.Flags().Lookup("description"))
 	assert.NotNil(t, cobraCmd.Flags().Lookup("interactive"))
@@ -40,12 +40,12 @@ func TestEditCommand_CreateCobraCommand(t *testing.T) {
 
 func TestEditCommand_validateFiles(t *testing.T) {
 	tmpDir := t.TempDir()
-	
+
 	// Create test file
 	existingFile := filepath.Join(tmpDir, "exists.go")
 	err := os.WriteFile(existingFile, []byte("package main"), 0644)
 	require.NoError(t, err)
-	
+
 	tests := []struct {
 		name    string
 		files   []string
@@ -82,7 +82,7 @@ func TestEditCommand_validateFiles(t *testing.T) {
 			cmd := NewEditCommand()
 			cmd.Files = tt.files
 			err := cmd.validateFiles()
-			
+
 			if tt.wantErr {
 				assert.Error(t, err)
 				assert.Contains(t, err.Error(), tt.errMsg)
@@ -95,7 +95,7 @@ func TestEditCommand_validateFiles(t *testing.T) {
 
 func TestEditCommand_createEditTask(t *testing.T) {
 	tmpDir := t.TempDir()
-	
+
 	// Create test files
 	file1 := filepath.Join(tmpDir, "file1.go")
 	file2 := filepath.Join(tmpDir, "file2.js")
@@ -103,28 +103,28 @@ func TestEditCommand_createEditTask(t *testing.T) {
 	require.NoError(t, err)
 	err = os.WriteFile(file2, []byte("console.log('hello');"), 0644)
 	require.NoError(t, err)
-	
+
 	cmd := NewEditCommand()
 	cmd.Files = []string{file1, file2}
 	cmd.Description = "Add error handling"
-	
+
 	task, err := cmd.createEditTask()
 	require.NoError(t, err)
 	assert.NotNil(t, task)
-	
+
 	// Check task properties
 	assert.Contains(t, task.ID, "edit_")
 	assert.Equal(t, agent.TaskTypeEdit, task.Type)
 	assert.Equal(t, agent.PriorityHigh, task.Priority)
 	assert.Equal(t, "Edit files based on instructions: Add error handling", task.Description)
-	
+
 	// Check file contexts
 	assert.Len(t, task.Context.Files, 2)
 	assert.Equal(t, file1, task.Context.Files[0].Path)
 	assert.Equal(t, "go", task.Context.Files[0].Language)
 	assert.Equal(t, file2, task.Context.Files[1].Path)
 	assert.Equal(t, "javascript", task.Context.Files[1].Language)
-	
+
 	// Check requirements
 	assert.Contains(t, task.Context.Requirements, "Instruction: Add error handling")
 	assert.Contains(t, task.Context.Requirements, "Provide detailed explanations for changes")
@@ -152,7 +152,7 @@ func TestEditCommand_detectLanguage(t *testing.T) {
 	}
 
 	cmd := NewEditCommand()
-	
+
 	for _, tt := range tests {
 		t.Run(tt.filePath, func(t *testing.T) {
 			result := cmd.detectLanguage(tt.filePath)
@@ -257,14 +257,14 @@ func TestEditCommand_detectFramework(t *testing.T) {
 
 func TestEditCommand_applyProposal(t *testing.T) {
 	tmpDir := t.TempDir()
-	
+
 	// Create test file
 	testFile := filepath.Join(tmpDir, "test.go")
 	err := os.WriteFile(testFile, []byte("original content"), 0644)
 	require.NoError(t, err)
-	
+
 	cmd := NewEditCommand()
-	
+
 	proposal := agent.Proposal{
 		ID: "test-proposal",
 		Changes: []agent.Change{
@@ -280,15 +280,15 @@ func TestEditCommand_applyProposal(t *testing.T) {
 			},
 		},
 	}
-	
+
 	err = cmd.applyProposal(proposal, nil)
 	require.NoError(t, err)
-	
+
 	// Check updated file
 	content, err := os.ReadFile(testFile)
 	require.NoError(t, err)
 	assert.Equal(t, "updated content", string(content))
-	
+
 	// Check created file
 	newContent, err := os.ReadFile(filepath.Join(tmpDir, "new.go"))
 	require.NoError(t, err)
@@ -297,14 +297,14 @@ func TestEditCommand_applyProposal(t *testing.T) {
 
 func TestEditCommand_applyProposal_Delete(t *testing.T) {
 	tmpDir := t.TempDir()
-	
+
 	// Create file to delete
 	deleteFile := filepath.Join(tmpDir, "delete.go")
 	err := os.WriteFile(deleteFile, []byte("to be deleted"), 0644)
 	require.NoError(t, err)
-	
+
 	cmd := NewEditCommand()
-	
+
 	proposal := agent.Proposal{
 		ID: "delete-proposal",
 		Changes: []agent.Change{
@@ -314,10 +314,10 @@ func TestEditCommand_applyProposal_Delete(t *testing.T) {
 			},
 		},
 	}
-	
+
 	err = cmd.applyProposal(proposal, nil)
 	require.NoError(t, err)
-	
+
 	// Check file was deleted
 	_, err = os.Stat(deleteFile)
 	assert.True(t, os.IsNotExist(err))
@@ -325,7 +325,7 @@ func TestEditCommand_applyProposal_Delete(t *testing.T) {
 
 func TestEditCommand_applyProposal_UnsupportedTypes(t *testing.T) {
 	cmd := NewEditCommand()
-	
+
 	proposal := agent.Proposal{
 		ID: "unsupported-proposal",
 		Changes: []agent.Change{
@@ -339,7 +339,7 @@ func TestEditCommand_applyProposal_UnsupportedTypes(t *testing.T) {
 			},
 		},
 	}
-	
+
 	// Should not error, just warn
 	err := cmd.applyProposal(proposal, nil)
 	assert.NoError(t, err)
@@ -347,46 +347,46 @@ func TestEditCommand_applyProposal_UnsupportedTypes(t *testing.T) {
 
 func TestEditCommand_fileOperations(t *testing.T) {
 	tmpDir := t.TempDir()
-	
+
 	cmd := NewEditCommand()
-	
+
 	t.Run("readFile", func(t *testing.T) {
 		testFile := filepath.Join(tmpDir, "read.txt")
 		content := "test content"
 		err := os.WriteFile(testFile, []byte(content), 0644)
 		require.NoError(t, err)
-		
+
 		result, err := cmd.readFile(testFile)
 		require.NoError(t, err)
 		assert.Equal(t, content, result)
 	})
-	
+
 	t.Run("writeFile", func(t *testing.T) {
 		testFile := filepath.Join(tmpDir, "write.txt")
 		content := "test content"
-		
+
 		err := cmd.writeFile(testFile, content)
 		require.NoError(t, err)
-		
+
 		// Read back and verify
 		data, err := os.ReadFile(testFile)
 		require.NoError(t, err)
 		assert.Equal(t, content, string(data))
-		
+
 		// Check permissions
 		info, err := os.Stat(testFile)
 		require.NoError(t, err)
 		assert.Equal(t, os.FileMode(0600), info.Mode().Perm())
 	})
-	
+
 	t.Run("deleteFile", func(t *testing.T) {
 		testFile := filepath.Join(tmpDir, "delete.txt")
 		err := os.WriteFile(testFile, []byte("delete me"), 0644)
 		require.NoError(t, err)
-		
+
 		err = cmd.deleteFile(testFile)
 		require.NoError(t, err)
-		
+
 		// Check file was deleted
 		_, err = os.Stat(testFile)
 		assert.True(t, os.IsNotExist(err))
@@ -397,7 +397,7 @@ func TestEditCommand_Execute_Validation(t *testing.T) {
 	cmd := NewEditCommand()
 	cmd.Files = []string{} // No files
 	ctx := context.Background()
-	
+
 	// Should fail validation
 	err := cmd.Execute(ctx)
 	assert.Error(t, err)
@@ -409,7 +409,7 @@ func TestEditCommand_executeDirectEdit(t *testing.T) {
 	cmd.Files = []string{"test.go"}
 	cmd.Description = "Test edit"
 	ctx := context.Background()
-	
+
 	// Direct edit is placeholder, should not error
 	err := cmd.executeDirectEdit(ctx, nil)
 	assert.NoError(t, err)
@@ -417,15 +417,15 @@ func TestEditCommand_executeDirectEdit(t *testing.T) {
 
 func TestEditCommand_processAgentResult(t *testing.T) {
 	tmpDir := t.TempDir()
-	
+
 	// Create test file
 	testFile := filepath.Join(tmpDir, "test.go")
 	err := os.WriteFile(testFile, []byte("original"), 0644)
 	require.NoError(t, err)
-	
+
 	cmd := NewEditCommand()
 	cmd.AutoCommit = false // Disable auto-commit for test
-	
+
 	result := &agent.OrchestrationResult{
 		Status: agent.StatusSuccess,
 		FinalResult: &agent.Result{
@@ -443,10 +443,10 @@ func TestEditCommand_processAgentResult(t *testing.T) {
 			},
 		},
 	}
-	
+
 	err = cmd.processAgentResult(result, nil)
 	require.NoError(t, err)
-	
+
 	// Check file was modified
 	content, err := os.ReadFile(testFile)
 	require.NoError(t, err)
@@ -455,11 +455,11 @@ func TestEditCommand_processAgentResult(t *testing.T) {
 
 func TestEditCommand_processAgentResult_Failed(t *testing.T) {
 	cmd := NewEditCommand()
-	
+
 	result := &agent.OrchestrationResult{
 		Status: agent.StatusFailed,
 	}
-	
+
 	err := cmd.processAgentResult(result, nil)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "agent execution failed")

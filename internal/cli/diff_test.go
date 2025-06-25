@@ -24,11 +24,11 @@ func TestNewDiffCommand(t *testing.T) {
 func TestDiffCommand_CreateCobraCommand(t *testing.T) {
 	cmd := NewDiffCommand()
 	cobraCmd := cmd.CreateCobraCommand()
-	
+
 	assert.NotNil(t, cobraCmd)
 	assert.Equal(t, "diff", cobraCmd.Use[:4])
 	assert.Contains(t, cobraCmd.Short, "Analyze code differences")
-	
+
 	// Check flags
 	assert.NotNil(t, cobraCmd.Flags().Lookup("staged"))
 	assert.NotNil(t, cobraCmd.Flags().Lookup("commit"))
@@ -47,8 +47,8 @@ func TestDiffCommand_buildDescription(t *testing.T) {
 		expected string
 	}{
 		{
-			name: "basic description",
-			setup: func(c *DiffCommand) {},
+			name:     "basic description",
+			setup:    func(c *DiffCommand) {},
 			expected: "Analyze git diff and explain code changes",
 		},
 		{
@@ -119,25 +119,25 @@ func TestDiffCommand_createDiffTask(t *testing.T) {
 	cmd.Summary = true
 	cmd.Detailed = true
 	cmd.Format = "json"
-	
+
 	diffContent := "diff --git a/file.go b/file.go\n+added line\n-removed line"
-	
+
 	task, err := cmd.createDiffTask(diffContent)
 	require.NoError(t, err)
 	assert.NotNil(t, task)
-	
+
 	// Check task properties
 	assert.Contains(t, task.ID, "diff_")
 	assert.Equal(t, agent.TaskTypeAnalyze, task.Type)
 	assert.Equal(t, agent.PriorityMedium, task.Priority)
-	
+
 	// Check file context
 	assert.Len(t, task.Context.Files, 1)
 	assert.Equal(t, "diff.patch", task.Context.Files[0].Path)
 	assert.Equal(t, diffContent, task.Context.Files[0].Content)
 	assert.Equal(t, "diff", task.Context.Files[0].Language)
 	assert.True(t, task.Context.Files[0].IsTarget)
-	
+
 	// Check requirements
 	assert.Contains(t, task.Context.Requirements, "Provide a concise summary of the changes")
 	assert.Contains(t, task.Context.Requirements, "Provide detailed line-by-line analysis")
@@ -148,12 +148,12 @@ func TestDiffCommand_formatMarkdown(t *testing.T) {
 	cmd := NewDiffCommand()
 	cmd.Commit = "abc123"
 	cmd.Summary = false
-	
+
 	analysis := "This diff shows important changes"
 	diffContent := "diff content here"
-	
+
 	result := cmd.formatMarkdown(analysis, diffContent)
-	
+
 	assert.Contains(t, result, "# Diff Analysis")
 	assert.Contains(t, result, "**Commit:** abc123")
 	assert.Contains(t, result, "## Analysis")
@@ -166,12 +166,12 @@ func TestDiffCommand_formatMarkdown(t *testing.T) {
 func TestDiffCommand_formatText(t *testing.T) {
 	cmd := NewDiffCommand()
 	cmd.Branch = "main"
-	
+
 	analysis := "Analysis content"
 	diffContent := "diff content"
-	
+
 	result := cmd.formatText(analysis, diffContent)
-	
+
 	assert.Contains(t, result, "DIFF ANALYSIS")
 	assert.Contains(t, result, "Compared to branch: main")
 	assert.Contains(t, result, "Analysis:")
@@ -186,12 +186,12 @@ func TestDiffCommand_formatJSON(t *testing.T) {
 	cmd.Summary = true
 	cmd.Detailed = false
 	cmd.startTime = time.Date(2024, 1, 1, 12, 0, 0, 0, time.UTC)
-	
+
 	analysis := "Test analysis"
 	diffContent := "Test diff"
-	
+
 	result := cmd.formatJSON(analysis, diffContent)
-	
+
 	// Parse result to verify it's valid JSON
 	assert.Contains(t, result, `"type": "commit"`)
 	assert.Contains(t, result, `"reference": "abc123"`)
@@ -204,12 +204,12 @@ func TestDiffCommand_formatJSON(t *testing.T) {
 func TestDiffCommand_formatHTML(t *testing.T) {
 	cmd := NewDiffCommand()
 	cmd.Staged = true
-	
+
 	analysis := "HTML analysis"
 	diffContent := "HTML diff"
-	
+
 	result := cmd.formatHTML(analysis, diffContent)
-	
+
 	assert.Contains(t, result, "<!DOCTYPE html>")
 	assert.Contains(t, result, "<title>Diff Analysis</title>")
 	assert.Contains(t, result, "<strong>Type:</strong> Staged changes")
@@ -273,7 +273,7 @@ func TestDiffCommand_formatOutput(t *testing.T) {
 		t.Run(tt.format, func(t *testing.T) {
 			cmd := NewDiffCommand()
 			cmd.Format = tt.format
-			
+
 			result, err := cmd.formatOutput(tt.analysis, tt.diff)
 			require.NoError(t, err)
 			tt.check(t, result)
@@ -363,31 +363,31 @@ func TestDiffCommand_detectFramework(t *testing.T) {
 func TestDiffCommand_fileOperations(t *testing.T) {
 	// Create temp directory
 	tmpDir := t.TempDir()
-	
+
 	cmd := NewDiffCommand()
-	
+
 	t.Run("fileExists", func(t *testing.T) {
 		// Create a test file
 		testFile := filepath.Join(tmpDir, "test.txt")
 		err := os.WriteFile(testFile, []byte("test"), 0644)
 		require.NoError(t, err)
-		
+
 		assert.True(t, cmd.fileExists(testFile))
 		assert.False(t, cmd.fileExists(filepath.Join(tmpDir, "nonexistent.txt")))
 	})
-	
+
 	t.Run("writeFile", func(t *testing.T) {
 		testFile := filepath.Join(tmpDir, "output.txt")
 		content := "test content"
-		
+
 		err := cmd.writeFile(testFile, content)
 		require.NoError(t, err)
-		
+
 		// Read back and verify
 		data, err := os.ReadFile(testFile)
 		require.NoError(t, err)
 		assert.Equal(t, content, string(data))
-		
+
 		// Check permissions
 		info, err := os.Stat(testFile)
 		require.NoError(t, err)
@@ -398,7 +398,7 @@ func TestDiffCommand_fileOperations(t *testing.T) {
 func TestDiffCommand_Execute_Validation(t *testing.T) {
 	cmd := NewDiffCommand()
 	ctx := context.Background()
-	
+
 	// Should fail outside git repository
 	// Note: This test assumes the test is not run inside a git repo
 	// In practice, you might want to create a temporary directory
@@ -410,7 +410,7 @@ func TestDiffCommand_Execute_Validation(t *testing.T) {
 
 func TestDiffCommand_getCommitDiff(t *testing.T) {
 	cmd := NewDiffCommand()
-	
+
 	// Test placeholder implementation
 	result, err := cmd.getCommitDiff(nil, "abc123")
 	require.NoError(t, err)
@@ -419,7 +419,7 @@ func TestDiffCommand_getCommitDiff(t *testing.T) {
 
 func TestDiffCommand_getBranchDiff(t *testing.T) {
 	cmd := NewDiffCommand()
-	
+
 	// Test placeholder implementation
 	result, err := cmd.getBranchDiff(nil, "main")
 	require.NoError(t, err)
@@ -429,7 +429,7 @@ func TestDiffCommand_getBranchDiff(t *testing.T) {
 func TestDiffCommand_getFileDiff(t *testing.T) {
 	cmd := NewDiffCommand()
 	files := []string{"file1.go", "file2.go"}
-	
+
 	// Test placeholder implementation
 	result, err := cmd.getFileDiff(nil, files)
 	require.NoError(t, err)

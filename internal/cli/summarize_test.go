@@ -23,11 +23,11 @@ func TestNewSummarizeCommand(t *testing.T) {
 func TestSummarizeCommand_CreateCobraCommand(t *testing.T) {
 	cmd := NewSummarizeCommand()
 	cobraCmd := cmd.CreateCobraCommand()
-	
+
 	assert.NotNil(t, cobraCmd)
 	assert.Equal(t, "summarize [files...]", cobraCmd.Use)
 	assert.Contains(t, cobraCmd.Short, "Generate code summaries")
-	
+
 	// Check flags
 	assert.NotNil(t, cobraCmd.Flags().Lookup("recursive"))
 	assert.NotNil(t, cobraCmd.Flags().Lookup("brief"))
@@ -103,7 +103,7 @@ func TestSummarizeCommand_validateInputs(t *testing.T) {
 			cmd := NewSummarizeCommand()
 			cmd.Files = tt.files
 			cmd.Format = tt.format
-			
+
 			err := cmd.validateInputs()
 			if tt.wantErr {
 				assert.Error(t, err)
@@ -153,7 +153,7 @@ func TestSummarizeCommand_buildDescription(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			cmd := NewSummarizeCommand()
 			tt.setup(cmd)
-			
+
 			result := cmd.buildDescription()
 			assert.Equal(t, tt.expected, result)
 		})
@@ -268,7 +268,7 @@ func TestSummarizeCommand_createSummarizeTask(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			cmd := NewSummarizeCommand()
 			tt.setup(cmd)
-			
+
 			task, err := cmd.createSummarizeTask()
 			if tt.wantErr {
 				assert.Error(t, err)
@@ -287,10 +287,10 @@ func TestSummarizeCommand_formatMarkdown(t *testing.T) {
 	cmd := NewSummarizeCommand()
 	cmd.Files = []string{"test.go", "main.go"}
 	cmd.Focus = "architecture"
-	
+
 	content := "This is the summary content"
 	result := cmd.formatMarkdown(content)
-	
+
 	assert.Contains(t, result, "# Code Summary")
 	assert.Contains(t, result, "**Focus:** architecture")
 	assert.Contains(t, result, "- `test.go`")
@@ -303,10 +303,10 @@ func TestSummarizeCommand_formatText(t *testing.T) {
 	cmd := NewSummarizeCommand()
 	cmd.Files = []string{"test.go"}
 	cmd.Focus = "dependencies"
-	
+
 	content := "Text summary"
 	result := cmd.formatText(content)
-	
+
 	assert.Contains(t, result, "CODE SUMMARY")
 	assert.Contains(t, result, "Focus: dependencies")
 	assert.Contains(t, result, "- test.go")
@@ -320,10 +320,10 @@ func TestSummarizeCommand_formatJSON(t *testing.T) {
 	cmd.Focus = "performance"
 	cmd.Brief = true
 	cmd.startTime = time.Date(2024, 1, 1, 12, 0, 0, 0, time.UTC)
-	
+
 	content := "JSON summary"
 	result := cmd.formatJSON(content)
-	
+
 	assert.Contains(t, result, `"focus": "performance"`)
 	assert.Contains(t, result, `"files": [`)
 	assert.Contains(t, result, `"file1.go"`)
@@ -338,10 +338,10 @@ func TestSummarizeCommand_formatHTML(t *testing.T) {
 	cmd := NewSummarizeCommand()
 	cmd.Files = []string{"index.js"}
 	cmd.Focus = "state management"
-	
+
 	content := "HTML content\nwith newlines"
 	result := cmd.formatHTML(content)
-	
+
 	assert.Contains(t, result, "<!DOCTYPE html>")
 	assert.Contains(t, result, "<title>Code Summary</title>")
 	assert.Contains(t, result, "<strong>Focus:</strong> state management")
@@ -356,10 +356,10 @@ func TestSummarizeCommand_formatYAML(t *testing.T) {
 	cmd.Focus = "testing"
 	cmd.Brief = false
 	cmd.startTime = time.Date(2024, 1, 1, 12, 0, 0, 0, time.UTC)
-	
+
 	content := "Line 1\nLine 2\nLine 3"
 	result := cmd.formatYAML(content)
-	
+
 	assert.Contains(t, result, "summary:")
 	assert.Contains(t, result, `focus: "testing"`)
 	assert.Contains(t, result, "files:")
@@ -452,14 +452,14 @@ func TestSummarizeCommand_detectProjectLanguage(t *testing.T) {
 			tmpDir := t.TempDir()
 			originalWd, _ := os.Getwd()
 			defer os.Chdir(originalWd)
-			
+
 			// Create test files
 			for name, content := range tt.files {
 				require.NoError(t, os.WriteFile(filepath.Join(tmpDir, name), []byte(content), 0644))
 			}
-			
+
 			require.NoError(t, os.Chdir(tmpDir))
-			
+
 			cmd := NewSummarizeCommand()
 			result := cmd.detectProjectLanguage()
 			assert.Equal(t, tt.expected, result)
@@ -500,14 +500,14 @@ func TestSummarizeCommand_detectFramework(t *testing.T) {
 			tmpDir := t.TempDir()
 			originalWd, _ := os.Getwd()
 			defer os.Chdir(originalWd)
-			
+
 			// Create test files
 			for name, content := range tt.files {
 				require.NoError(t, os.WriteFile(filepath.Join(tmpDir, name), []byte(content), 0644))
 			}
-			
+
 			require.NoError(t, os.Chdir(tmpDir))
-			
+
 			cmd := NewSummarizeCommand()
 			result := cmd.detectFramework()
 			assert.Equal(t, tt.expected, result)
@@ -519,24 +519,24 @@ func TestSummarizeCommand_fileOperations(t *testing.T) {
 	tmpDir := t.TempDir()
 	testFile := filepath.Join(tmpDir, "test.txt")
 	testContent := "test content"
-	
+
 	cmd := NewSummarizeCommand()
-	
+
 	// Test fileExists - non-existent
 	assert.False(t, cmd.fileExists(testFile))
-	
+
 	// Test writeFile
 	err := cmd.writeFile(testFile, testContent)
 	assert.NoError(t, err)
-	
+
 	// Test fileExists - exists
 	assert.True(t, cmd.fileExists(testFile))
-	
+
 	// Test readFile
 	content, err := cmd.readFile(testFile)
 	assert.NoError(t, err)
 	assert.Equal(t, testContent, content)
-	
+
 	// Test readFile - non-existent
 	_, err = cmd.readFile(filepath.Join(tmpDir, "nonexistent.txt"))
 	assert.Error(t, err)
@@ -598,7 +598,7 @@ func TestSummarizeCommand_outputResult(t *testing.T) {
 			cmd := NewSummarizeCommand()
 			cmd.Format = tt.format
 			cmd.OutputFile = tt.outputFile
-			
+
 			err := cmd.outputResult(tt.result)
 			if tt.wantErr {
 				assert.Error(t, err)
@@ -659,7 +659,7 @@ func TestSummarizeCommand_formatOutput(t *testing.T) {
 			cmd := NewSummarizeCommand()
 			cmd.Format = tt.format
 			cmd.Files = []string{"test.go"}
-			
+
 			result, err := cmd.formatOutput(tt.content)
 			if tt.wantErr {
 				assert.Error(t, err)
@@ -677,11 +677,11 @@ func TestSummarizeCommand_formatYAMLIndentation(t *testing.T) {
 	cmd := NewSummarizeCommand()
 	cmd.Files = []string{"test.go"}
 	cmd.Focus = ""
-	
+
 	// Test multi-line content indentation
 	content := "First line\nSecond line\n  Indented line\nLast line"
 	result := cmd.formatYAML(content)
-	
+
 	// Check that each content line is properly indented
 	lines := strings.Split(result, "\n")
 	foundContent := false

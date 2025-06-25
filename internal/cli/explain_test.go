@@ -23,11 +23,11 @@ func TestNewExplainCommand(t *testing.T) {
 func TestExplainCommand_CreateCobraCommand(t *testing.T) {
 	cmd := NewExplainCommand()
 	cobraCmd := cmd.CreateCobraCommand()
-	
+
 	assert.NotNil(t, cobraCmd)
 	assert.Equal(t, "explain [files...]", cobraCmd.Use)
 	assert.Contains(t, cobraCmd.Short, "Explain code files")
-	
+
 	// Check flags
 	assert.NotNil(t, cobraCmd.Flags().Lookup("query"))
 	assert.NotNil(t, cobraCmd.Flags().Lookup("detailed"))
@@ -97,7 +97,7 @@ func TestExplainCommand_validateInputs(t *testing.T) {
 			cmd := NewExplainCommand()
 			cmd.Files = tt.files
 			cmd.Format = tt.format
-			
+
 			err := cmd.validateInputs()
 			if tt.wantErr {
 				assert.Error(t, err)
@@ -147,7 +147,7 @@ func TestExplainCommand_buildDescription(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			cmd := NewExplainCommand()
 			tt.setup(cmd)
-			
+
 			result := cmd.buildDescription()
 			assert.Equal(t, tt.expected, result)
 		})
@@ -244,7 +244,7 @@ func TestExplainCommand_createExplainTask(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			cmd := NewExplainCommand()
 			tt.setup(cmd)
-			
+
 			task, err := cmd.createExplainTask()
 			if tt.wantErr {
 				assert.Error(t, err)
@@ -263,10 +263,10 @@ func TestExplainCommand_formatMarkdown(t *testing.T) {
 	cmd := NewExplainCommand()
 	cmd.Files = []string{"test.go", "main.go"}
 	cmd.Query = "error handling"
-	
+
 	content := "This is the explanation content"
 	result := cmd.formatMarkdown(content)
-	
+
 	assert.Contains(t, result, "# Code Explanation")
 	assert.Contains(t, result, "**Query:** error handling")
 	assert.Contains(t, result, "- `test.go`")
@@ -279,10 +279,10 @@ func TestExplainCommand_formatText(t *testing.T) {
 	cmd := NewExplainCommand()
 	cmd.Files = []string{"test.go"}
 	cmd.Query = "patterns"
-	
+
 	content := "Text explanation"
 	result := cmd.formatText(content)
-	
+
 	assert.Contains(t, result, "CODE EXPLANATION")
 	assert.Contains(t, result, "Query: patterns")
 	assert.Contains(t, result, "- test.go")
@@ -295,10 +295,10 @@ func TestExplainCommand_formatJSON(t *testing.T) {
 	cmd.Files = []string{"file1.go", "file2.go"}
 	cmd.Query = "test query"
 	cmd.startTime = time.Date(2024, 1, 1, 12, 0, 0, 0, time.UTC)
-	
+
 	content := "JSON explanation"
 	result := cmd.formatJSON(content)
-	
+
 	assert.Contains(t, result, `"query": "test query"`)
 	assert.Contains(t, result, `"files": [`)
 	assert.Contains(t, result, `"file1.go"`)
@@ -312,10 +312,10 @@ func TestExplainCommand_formatHTML(t *testing.T) {
 	cmd := NewExplainCommand()
 	cmd.Files = []string{"index.js"}
 	cmd.Query = "async operations"
-	
+
 	content := "HTML content\nwith newlines"
 	result := cmd.formatHTML(content)
-	
+
 	assert.Contains(t, result, "<!DOCTYPE html>")
 	assert.Contains(t, result, "<title>Code Explanation</title>")
 	assert.Contains(t, result, "<strong>Query:</strong> async operations")
@@ -403,14 +403,14 @@ func TestExplainCommand_detectProjectLanguage(t *testing.T) {
 			tmpDir := t.TempDir()
 			originalWd, _ := os.Getwd()
 			defer os.Chdir(originalWd)
-			
+
 			// Create test files
 			for name, content := range tt.files {
 				require.NoError(t, os.WriteFile(filepath.Join(tmpDir, name), []byte(content), 0644))
 			}
-			
+
 			require.NoError(t, os.Chdir(tmpDir))
-			
+
 			cmd := NewExplainCommand()
 			result := cmd.detectProjectLanguage()
 			assert.Equal(t, tt.expected, result)
@@ -451,14 +451,14 @@ func TestExplainCommand_detectFramework(t *testing.T) {
 			tmpDir := t.TempDir()
 			originalWd, _ := os.Getwd()
 			defer os.Chdir(originalWd)
-			
+
 			// Create test files
 			for name, content := range tt.files {
 				require.NoError(t, os.WriteFile(filepath.Join(tmpDir, name), []byte(content), 0644))
 			}
-			
+
 			require.NoError(t, os.Chdir(tmpDir))
-			
+
 			cmd := NewExplainCommand()
 			result := cmd.detectFramework()
 			assert.Equal(t, tt.expected, result)
@@ -470,24 +470,24 @@ func TestExplainCommand_fileOperations(t *testing.T) {
 	tmpDir := t.TempDir()
 	testFile := filepath.Join(tmpDir, "test.txt")
 	testContent := "test content"
-	
+
 	cmd := NewExplainCommand()
-	
+
 	// Test fileExists - non-existent
 	assert.False(t, cmd.fileExists(testFile))
-	
+
 	// Test writeFile
 	err := cmd.writeFile(testFile, testContent)
 	assert.NoError(t, err)
-	
+
 	// Test fileExists - exists
 	assert.True(t, cmd.fileExists(testFile))
-	
+
 	// Test readFile
 	content, err := cmd.readFile(testFile)
 	assert.NoError(t, err)
 	assert.Equal(t, testContent, content)
-	
+
 	// Test readFile - non-existent
 	_, err = cmd.readFile(filepath.Join(tmpDir, "nonexistent.txt"))
 	assert.Error(t, err)
@@ -549,7 +549,7 @@ func TestExplainCommand_outputResult(t *testing.T) {
 			cmd := NewExplainCommand()
 			cmd.Format = tt.format
 			cmd.OutputFile = tt.outputFile
-			
+
 			err := cmd.outputResult(tt.result)
 			if tt.wantErr {
 				assert.Error(t, err)
@@ -604,7 +604,7 @@ func TestExplainCommand_formatOutput(t *testing.T) {
 			cmd := NewExplainCommand()
 			cmd.Format = tt.format
 			cmd.Files = []string{"test.go"}
-			
+
 			result, err := cmd.formatOutput(tt.content)
 			if tt.wantErr {
 				assert.Error(t, err)

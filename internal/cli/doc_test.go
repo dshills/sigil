@@ -22,11 +22,11 @@ func TestNewDocCommand(t *testing.T) {
 func TestDocCommand_CreateCobraCommand(t *testing.T) {
 	cmd := NewDocCommand()
 	cobraCmd := cmd.CreateCobraCommand()
-	
+
 	assert.NotNil(t, cobraCmd)
 	assert.Equal(t, "doc", cobraCmd.Use[:3])
 	assert.Contains(t, cobraCmd.Short, "Generate documentation")
-	
+
 	// Check flags
 	assert.NotNil(t, cobraCmd.Flags().Lookup("output"))
 	assert.NotNil(t, cobraCmd.Flags().Lookup("format"))
@@ -40,12 +40,12 @@ func TestDocCommand_CreateCobraCommand(t *testing.T) {
 
 func TestDocCommand_validateInputs(t *testing.T) {
 	tmpDir := t.TempDir()
-	
+
 	// Create test files
 	existingFile := filepath.Join(tmpDir, "exists.go")
 	err := os.WriteFile(existingFile, []byte("package main"), 0644)
 	require.NoError(t, err)
-	
+
 	tests := []struct {
 		name    string
 		setup   func(*DocCommand)
@@ -92,7 +92,7 @@ func TestDocCommand_validateInputs(t *testing.T) {
 			cmd := NewDocCommand()
 			tt.setup(cmd)
 			err := cmd.validateInputs()
-			
+
 			if tt.wantErr {
 				assert.Error(t, err)
 				assert.Contains(t, err.Error(), tt.errMsg)
@@ -105,13 +105,13 @@ func TestDocCommand_validateInputs(t *testing.T) {
 
 func TestDocCommand_ensureOutputDir(t *testing.T) {
 	tmpDir := t.TempDir()
-	
+
 	cmd := NewDocCommand()
 	cmd.OutputDir = filepath.Join(tmpDir, "new", "docs")
-	
+
 	err := cmd.ensureOutputDir()
 	require.NoError(t, err)
-	
+
 	// Check directory was created
 	info, err := os.Stat(cmd.OutputDir)
 	require.NoError(t, err)
@@ -136,7 +136,7 @@ func TestDocCommand_isTestFile(t *testing.T) {
 	}
 
 	cmd := NewDocCommand()
-	
+
 	for _, tt := range tests {
 		t.Run(tt.path, func(t *testing.T) {
 			result := cmd.isTestFile(tt.path)
@@ -159,7 +159,7 @@ func TestDocCommand_hasPrivateContent(t *testing.T) {
 	}
 
 	cmd := NewDocCommand()
-	
+
 	for _, tt := range tests {
 		t.Run(tt.content[:min(20, len(tt.content))], func(t *testing.T) {
 			result := cmd.hasPrivateContent(tt.content)
@@ -177,7 +177,7 @@ normal line
 
 	cmd := NewDocCommand()
 	result := cmd.filterPrivateContent(content)
-	
+
 	// Check that private/internal lines are removed
 	assert.NotContains(t, result, "private func")
 	assert.NotContains(t, result, "internal var")
@@ -236,7 +236,7 @@ func TestDocCommand_createDocTask(t *testing.T) {
 	cmd.Template = "api"
 	cmd.IncludePrivate = true
 	cmd.Language = "go"
-	
+
 	fileContexts := []agent.FileContext{
 		{
 			Path:     "test.go",
@@ -245,24 +245,24 @@ func TestDocCommand_createDocTask(t *testing.T) {
 			Purpose:  "Code to document",
 		},
 	}
-	
+
 	task, err := cmd.createDocTask(fileContexts)
 	require.NoError(t, err)
 	assert.NotNil(t, task)
-	
+
 	// Check task properties
 	assert.Contains(t, task.ID, "doc_")
 	assert.Equal(t, agent.TaskTypeGenerate, task.Type)
 	assert.Equal(t, agent.PriorityMedium, task.Priority)
-	
+
 	// Check file context
 	assert.Equal(t, fileContexts, task.Context.Files)
-	
+
 	// Check requirements
 	assert.Contains(t, task.Context.Requirements, "Format documentation as html")
 	assert.Contains(t, task.Context.Requirements, "Use template: api")
 	assert.Contains(t, task.Context.Requirements, "Include documentation for private/internal elements")
-	
+
 	// Check project info
 	assert.Equal(t, "go", task.Context.ProjectInfo.Language)
 }
@@ -281,7 +281,7 @@ func TestDocCommand_getFileExtension(t *testing.T) {
 	}
 
 	cmd := NewDocCommand()
-	
+
 	for _, tt := range tests {
 		t.Run(tt.format, func(t *testing.T) {
 			cmd.Format = tt.format
@@ -293,20 +293,20 @@ func TestDocCommand_getFileExtension(t *testing.T) {
 
 func TestDocCommand_writeDocFile(t *testing.T) {
 	tmpDir := t.TempDir()
-	
+
 	cmd := NewDocCommand()
 	cmd.OutputDir = tmpDir
 	cmd.Format = "markdown"
-	
+
 	artifact := agent.Artifact{
 		Name:    "test",
 		Type:    "documentation",
 		Content: "# Test Documentation",
 	}
-	
+
 	err := cmd.writeDocFile(artifact)
 	require.NoError(t, err)
-	
+
 	// Check file was created with correct extension
 	expectedPath := filepath.Join(tmpDir, "test.md")
 	content, err := os.ReadFile(expectedPath)
@@ -316,36 +316,36 @@ func TestDocCommand_writeDocFile(t *testing.T) {
 
 func TestDocCommand_writeDocFile_UpdateExisting(t *testing.T) {
 	tmpDir := t.TempDir()
-	
+
 	// Create existing file
 	existingFile := filepath.Join(tmpDir, "existing.md")
 	err := os.WriteFile(existingFile, []byte("old content"), 0644)
 	require.NoError(t, err)
-	
+
 	cmd := NewDocCommand()
 	cmd.OutputDir = tmpDir
 	cmd.Format = "markdown"
-	
+
 	artifact := agent.Artifact{
 		Name:    "existing",
 		Content: "new content",
 	}
-	
+
 	// Test with UpdateExisting = false
 	cmd.UpdateExisting = false
 	err = cmd.writeDocFile(artifact)
 	require.NoError(t, err)
-	
+
 	// Should not update
 	content, err := os.ReadFile(existingFile)
 	require.NoError(t, err)
 	assert.Equal(t, "old content", string(content))
-	
+
 	// Test with UpdateExisting = true
 	cmd.UpdateExisting = true
 	err = cmd.writeDocFile(artifact)
 	require.NoError(t, err)
-	
+
 	// Should update
 	content, err = os.ReadFile(existingFile)
 	require.NoError(t, err)
@@ -354,19 +354,19 @@ func TestDocCommand_writeDocFile_UpdateExisting(t *testing.T) {
 
 func TestDocCommand_processFiles(t *testing.T) {
 	tmpDir := t.TempDir()
-	
+
 	// Create test files
 	regularFile := filepath.Join(tmpDir, "regular.go")
 	testFile := filepath.Join(tmpDir, "main_test.go")
 	privateFile := filepath.Join(tmpDir, "private.go")
-	
+
 	err := os.WriteFile(regularFile, []byte("package main\npublic content"), 0644)
 	require.NoError(t, err)
 	err = os.WriteFile(testFile, []byte("package main\ntest content"), 0644)
 	require.NoError(t, err)
 	err = os.WriteFile(privateFile, []byte("package main\nprivate content"), 0644)
 	require.NoError(t, err)
-	
+
 	tests := []struct {
 		name           string
 		includeTests   bool
@@ -405,7 +405,7 @@ func TestDocCommand_processFiles(t *testing.T) {
 			cmd.Files = []string{regularFile, testFile, privateFile}
 			cmd.IncludeTests = tt.includeTests
 			cmd.IncludePrivate = tt.includePrivate
-			
+
 			contexts, err := cmd.processFiles()
 			require.NoError(t, err)
 			assert.Len(t, contexts, tt.expectedCount)
@@ -469,32 +469,32 @@ func TestDocCommand_detectProjectLanguage(t *testing.T) {
 
 func TestDocCommand_fileOperations(t *testing.T) {
 	tmpDir := t.TempDir()
-	
+
 	cmd := NewDocCommand()
-	
+
 	t.Run("readFile", func(t *testing.T) {
 		testFile := filepath.Join(tmpDir, "read.txt")
 		content := "test content"
 		err := os.WriteFile(testFile, []byte(content), 0644)
 		require.NoError(t, err)
-		
+
 		result, err := cmd.readFile(testFile)
 		require.NoError(t, err)
 		assert.Equal(t, content, result)
 	})
-	
+
 	t.Run("writeFile", func(t *testing.T) {
 		testFile := filepath.Join(tmpDir, "subdir", "write.txt")
 		content := "test content"
-		
+
 		err := cmd.writeFile(testFile, content)
 		require.NoError(t, err)
-		
+
 		// Read back and verify
 		data, err := os.ReadFile(testFile)
 		require.NoError(t, err)
 		assert.Equal(t, content, string(data))
-		
+
 		// Check permissions
 		info, err := os.Stat(testFile)
 		require.NoError(t, err)

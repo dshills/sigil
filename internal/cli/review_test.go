@@ -24,11 +24,11 @@ func TestNewReviewCommand(t *testing.T) {
 func TestReviewCommand_CreateCobraCommand(t *testing.T) {
 	cmd := NewReviewCommand()
 	cobraCmd := cmd.CreateCobraCommand()
-	
+
 	assert.NotNil(t, cobraCmd)
 	assert.Equal(t, "review [files...]", cobraCmd.Use)
 	assert.Contains(t, cobraCmd.Short, "Review code")
-	
+
 	// Check flags
 	assert.NotNil(t, cobraCmd.Flags().Lookup("focus"))
 	assert.NotNil(t, cobraCmd.Flags().Lookup("severity"))
@@ -146,7 +146,7 @@ func TestReviewCommand_validateInputs(t *testing.T) {
 			cmd.Files = tt.files
 			cmd.Severity = tt.severity
 			cmd.Format = tt.format
-			
+
 			err := cmd.validateInputs()
 			if tt.wantErr {
 				assert.Error(t, err)
@@ -196,7 +196,7 @@ func TestReviewCommand_buildDescription(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			cmd := NewReviewCommand()
 			tt.setup(cmd)
-			
+
 			result := cmd.buildDescription()
 			assert.Equal(t, tt.expected, result)
 		})
@@ -342,7 +342,7 @@ func TestReviewCommand_createReviewTask(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			cmd := NewReviewCommand()
 			tt.setup(cmd)
-			
+
 			task, err := cmd.createReviewTask()
 			if tt.wantErr {
 				assert.Error(t, err)
@@ -363,7 +363,7 @@ func TestReviewCommand_formatMarkdown(t *testing.T) {
 	cmd.Focus = []string{"security", "performance"}
 	cmd.Severity = "error"
 	cmd.startTime = time.Date(2024, 1, 1, 12, 0, 0, 0, time.UTC)
-	
+
 	content := "Review findings content"
 	result := &agent.OrchestrationResult{
 		Status: agent.StatusSuccess,
@@ -371,9 +371,9 @@ func TestReviewCommand_formatMarkdown(t *testing.T) {
 			{}, {}, {}, // 3 findings
 		},
 	}
-	
+
 	formatted := cmd.formatMarkdown(content, result)
-	
+
 	assert.Contains(t, formatted, "# Code Review Report")
 	assert.Contains(t, formatted, "**Focus Areas:** security, performance")
 	assert.Contains(t, formatted, "- `test.go`")
@@ -390,15 +390,15 @@ func TestReviewCommand_formatText(t *testing.T) {
 	cmd.Files = []string{"test.go"}
 	cmd.Focus = []string{"testing"}
 	cmd.Severity = "warning"
-	
+
 	content := "Text review"
 	result := &agent.OrchestrationResult{
-		Status: agent.StatusSuccess,
+		Status:  agent.StatusSuccess,
 		Results: []agent.Result{{}},
 	}
-	
+
 	formatted := cmd.formatText(content, result)
-	
+
 	assert.Contains(t, formatted, "CODE REVIEW REPORT")
 	assert.Contains(t, formatted, "Focus Areas: testing")
 	assert.Contains(t, formatted, "- test.go")
@@ -414,15 +414,15 @@ func TestReviewCommand_formatJSON(t *testing.T) {
 	cmd.Focus = []string{"security"}
 	cmd.Severity = "error"
 	cmd.startTime = time.Date(2024, 1, 1, 12, 0, 0, 0, time.UTC)
-	
+
 	content := "JSON review"
 	result := &agent.OrchestrationResult{
-		Status: agent.StatusSuccess,
+		Status:  agent.StatusSuccess,
 		Results: []agent.Result{{}, {}},
 	}
-	
+
 	formatted := cmd.formatJSON(content, result)
-	
+
 	assert.Contains(t, formatted, `"focus_areas": [`)
 	assert.Contains(t, formatted, `"security"`)
 	assert.Contains(t, formatted, `"files": [`)
@@ -440,15 +440,15 @@ func TestReviewCommand_formatXML(t *testing.T) {
 	cmd.Focus = []string{"style", "performance"}
 	cmd.Severity = "info"
 	cmd.startTime = time.Date(2024, 1, 1, 12, 0, 0, 0, time.UTC)
-	
+
 	content := "XML review content"
 	result := &agent.OrchestrationResult{
-		Status: agent.StatusSuccess,
+		Status:  agent.StatusSuccess,
 		Results: []agent.Result{},
 	}
-	
+
 	formatted := cmd.formatXML(content, result)
-	
+
 	assert.Contains(t, formatted, `<?xml version="1.0" encoding="UTF-8"?>`)
 	assert.Contains(t, formatted, "<review>")
 	assert.Contains(t, formatted, "<severity>info</severity>")
@@ -467,15 +467,15 @@ func TestReviewCommand_formatSARIF(t *testing.T) {
 	cmd := NewReviewCommand()
 	cmd.Files = []string{"main.go"}
 	cmd.Severity = "error"
-	
+
 	content := "SARIF review"
 	result := &agent.OrchestrationResult{
-		Status: agent.StatusSuccess,
+		Status:  agent.StatusSuccess,
 		Results: []agent.Result{{}, {}, {}, {}, {}}, // 5 findings
 	}
-	
+
 	formatted := cmd.formatSARIF(content, result)
-	
+
 	assert.Contains(t, formatted, `"$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0.json"`)
 	assert.Contains(t, formatted, `"version": "2.1.0"`)
 	assert.Contains(t, formatted, `"name": "Sigil Code Review"`)
@@ -549,14 +549,14 @@ func TestReviewCommand_detectProjectLanguage(t *testing.T) {
 			tmpDir := t.TempDir()
 			originalWd, _ := os.Getwd()
 			defer os.Chdir(originalWd)
-			
+
 			// Create test files
 			for name, content := range tt.files {
 				require.NoError(t, os.WriteFile(filepath.Join(tmpDir, name), []byte(content), 0644))
 			}
-			
+
 			require.NoError(t, os.Chdir(tmpDir))
-			
+
 			cmd := NewReviewCommand()
 			result := cmd.detectProjectLanguage()
 			assert.Equal(t, tt.expected, result)
@@ -597,14 +597,14 @@ func TestReviewCommand_detectFramework(t *testing.T) {
 			tmpDir := t.TempDir()
 			originalWd, _ := os.Getwd()
 			defer os.Chdir(originalWd)
-			
+
 			// Create test files
 			for name, content := range tt.files {
 				require.NoError(t, os.WriteFile(filepath.Join(tmpDir, name), []byte(content), 0644))
 			}
-			
+
 			require.NoError(t, os.Chdir(tmpDir))
-			
+
 			cmd := NewReviewCommand()
 			result := cmd.detectFramework()
 			assert.Equal(t, tt.expected, result)
@@ -616,24 +616,24 @@ func TestReviewCommand_fileOperations(t *testing.T) {
 	tmpDir := t.TempDir()
 	testFile := filepath.Join(tmpDir, "test.txt")
 	testContent := "test content"
-	
+
 	cmd := NewReviewCommand()
-	
+
 	// Test fileExists - non-existent
 	assert.False(t, cmd.fileExists(testFile))
-	
+
 	// Test writeFile
 	err := cmd.writeFile(testFile, testContent)
 	assert.NoError(t, err)
-	
+
 	// Test fileExists - exists
 	assert.True(t, cmd.fileExists(testFile))
-	
+
 	// Test readFile
 	content, err := cmd.readFile(testFile)
 	assert.NoError(t, err)
 	assert.Equal(t, testContent, content)
-	
+
 	// Test deleteFile
 	err = cmd.deleteFile(testFile)
 	assert.NoError(t, err)
@@ -697,7 +697,7 @@ func TestReviewCommand_outputResult(t *testing.T) {
 			cmd := NewReviewCommand()
 			cmd.Format = tt.format
 			cmd.OutputFile = tt.outputFile
-			
+
 			err := cmd.outputResult(tt.result)
 			if tt.wantErr {
 				assert.Error(t, err)
@@ -710,7 +710,7 @@ func TestReviewCommand_outputResult(t *testing.T) {
 
 func TestReviewCommand_applyProposal(t *testing.T) {
 	tmpDir := t.TempDir()
-	
+
 	tests := []struct {
 		name     string
 		proposal agent.Proposal
@@ -783,10 +783,10 @@ func TestReviewCommand_applyProposal(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.setup()
-			
+
 			cmd := NewReviewCommand()
 			err := cmd.applyProposal(tt.proposal)
-			
+
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
@@ -847,12 +847,12 @@ func TestReviewCommand_formatOutput(t *testing.T) {
 			cmd := NewReviewCommand()
 			cmd.Format = tt.format
 			cmd.Files = []string{"test.go"}
-			
+
 			result := &agent.OrchestrationResult{
-				Status: agent.StatusSuccess,
+				Status:  agent.StatusSuccess,
 				Results: []agent.Result{},
 			}
-			
+
 			formatted, err := cmd.formatOutput(tt.content, result)
 			if tt.wantErr {
 				assert.Error(t, err)
