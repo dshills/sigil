@@ -54,6 +54,7 @@ lib/
 build/
 tmp/
 sigil
+*.test
 
 # AWS CDK outputs
 .aws/cdk/cdk.context.json
