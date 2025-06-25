@@ -302,7 +302,7 @@ func (c *ReviewCommand) formatOutput(content string, result *agent.Orchestration
 		return c.formatMarkdown(content, result), nil
 	case "text":
 		return c.formatText(content, result), nil
-	case OutputFormatJSON:
+	case string(OutputFormatJSON):
 		return c.formatJSON(content, result), nil
 	case "xml":
 		return c.formatXML(content, result), nil
