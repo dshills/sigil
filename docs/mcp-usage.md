@@ -253,15 +253,122 @@ sigil edit --model mcp://postgres-mcp,mcp://github-mcp \
 3. **Network Access**: Some servers may make network requests
 4. **File Access**: Servers may have file system access based on their implementation
 
+## Advanced Features
+
+### Connection Pooling
+
+Sigil automatically manages connection pools for better performance:
+
+```yaml
+# Configure in .sigil/config.yml
+mcp:
+  connection_pool:
+    default_size: 3        # Default connections per server
+    max_size: 10          # Maximum connections per server
+    cleanup_interval: 5m  # Pool cleanup frequency
+```
+
+### Health Monitoring
+
+Automatic health monitoring with restart capabilities:
+
+```yaml
+mcp:
+  health_monitoring:
+    enabled: true
+    check_interval: 15s      # How often to check server health
+    failure_threshold: 3     # Failures before marking unhealthy
+    recovery_timeout: 2m     # Time before attempting restart
+```
+
+### Tool Calling
+
+Use MCP server tools directly:
+
+```bash
+# List available tools from a server
+sigil mcp status github-mcp --tools
+
+# Tools are automatically available when using MCP models
+sigil ask --model mcp://github-mcp "Create a new issue for bug fix"
+```
+
+### Resource Management
+
+Access server-provided resources:
+
+```bash
+# List available resources
+sigil mcp status postgres-mcp --resources
+
+# Resources provide context automatically
+sigil explain schema.sql --model mcp://postgres-mcp
+```
+
+### Prompt Templates
+
+Use server-provided prompt templates:
+
+```bash
+# List available prompt templates
+sigil mcp status python-tools --prompts
+
+# Templates enhance model capabilities
+sigil edit mycode.py --model mcp://python-tools --template "optimize_code"
+```
+
 ## Performance Tips
 
 1. **Server Reuse**: Servers stay running between commands for better performance
 2. **Timeouts**: Adjust timeouts based on server response times
 3. **Auto-restart**: Disable for development servers that change frequently
-4. **Connection Pooling**: Servers automatically pool connections
+4. **Connection Pooling**: Servers automatically pool connections for efficiency
+5. **Health Monitoring**: Failed servers restart automatically for reliability
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Server Won't Start**
+   ```bash
+   # Check server logs
+   sigil mcp status server-name --verbose
+   
+   # Manually test server command
+   npx -y @modelcontextprotocol/server-github
+   ```
+
+2. **Connection Timeouts**
+   ```yaml
+   # Increase timeouts in server config
+   settings:
+     timeout: 60s
+     max_retries: 5
+   ```
+
+3. **Server Crashes**
+   ```yaml
+   # Enable auto-restart with more attempts
+   auto_restart: true
+   max_restarts: 10
+   ```
+
+### Debug Mode
+
+Enable verbose logging for troubleshooting:
+
+```bash
+# Enable verbose output
+sigil --verbose mcp status
+
+# Check server health
+sigil mcp status --json | jq '.servers[] | {name, status, error}'
+```
 
 ## Next Steps
 
 - Explore available [MCP servers](https://github.com/topics/mcp-server)
 - Create your own [custom MCP server](https://modelcontextprotocol.io/docs/create-server)
+- Check out the example configurations in `examples/config/mcp-servers.yaml`
+- Run the demo script: `examples/scripts/mcp-demo.sh`
 - Read the [MCP specification](https://modelcontextprotocol.io/spec)

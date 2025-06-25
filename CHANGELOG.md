@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Complete MCP Implementation**: Full Model Context Protocol support with:
+  - JSON-RPC 2.0 compliant protocol handlers
+  - Tool calling and function execution capabilities
+  - Resource management (list, read, subscribe to resources)
+  - Prompt template support for server-provided templates
+  - Connection pooling with LRU management for efficiency
+  - Health monitoring with automatic server restart
+  - Comprehensive error handling and retry logic
+  - 43KB+ of test coverage with mock servers and comprehensive test suites
 - Initial release of Sigil - AI-powered code transformation CLI tool
 - Core CLI commands:
   - `ask` - Ask questions about code with context-aware responses
@@ -53,6 +62,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Architecture overview and component documentation
   - Command examples and common workflows
   - Troubleshooting guide
+
+### Fixed
+- MCP CLI status display compatibility with new ServerStatus struct
+- Code formatting and linting issues (gofmt, goconst, misspell)
+- Type mismatches in CLI format switches
+- Proper constant usage throughout codebase
 
 ### Security
 - Sandboxed execution environment for code validation

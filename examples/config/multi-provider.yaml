@@ -44,13 +44,24 @@ models:
             context_length: 8192
             gpu_layers: 30
     
-    # MCP configuration (custom model server)
+    # MCP configuration (Model Context Protocol servers)
     mcp:
-      endpoint: ${MCP_ENDPOINT:-http://localhost:8080}
-      api_key: ${MCP_API_KEY}
-      options:
-        timeout: 60
-        retry_count: 3
+      # Configure MCP servers for extended capabilities
+      servers:
+        github-mcp:
+          command: "npx"
+          args: ["-y", "@modelcontextprotocol/server-github"]
+          env:
+            GITHUB_PERSONAL_ACCESS_TOKEN: ${GITHUB_TOKEN}
+          transport: "stdio"
+          auto_restart: true
+          
+        postgres-mcp:
+          command: "mcp-server-postgres"
+          env:
+            POSTGRES_CONNECTION_STRING: ${POSTGRES_URL}
+          transport: "stdio"
+          auto_restart: true
 
 # Model selection strategy
 model_selection:

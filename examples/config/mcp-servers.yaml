@@ -1,0 +1,155 @@
+# MCP (Model Context Protocol) Server Configuration
+# This example demonstrates comprehensive MCP server configuration
+
+# MCP Server configurations
+mcp:
+  servers:
+    # GitHub integration server
+    github-mcp:
+      name: "github-mcp"
+      command: "npx"
+      args: ["-y", "@modelcontextprotocol/server-github"]
+      env:
+        GITHUB_PERSONAL_ACCESS_TOKEN: ${GITHUB_TOKEN}
+      transport: "stdio"
+      auto_restart: true
+      max_restarts: 3
+      settings:
+        timeout: "30s"
+        max_retries: 3
+    
+    # PostgreSQL database server
+    postgres-mcp:
+      name: "postgres-mcp"
+      command: "mcp-server-postgres"
+      env:
+        POSTGRES_CONNECTION_STRING: ${POSTGRES_URL}
+        POSTGRES_DATABASE: ${POSTGRES_DB:-mydb}
+      transport: "stdio"
+      auto_restart: true
+      max_restarts: 5
+      settings:
+        timeout: "60s"
+        max_retries: 2
+    
+    # File system operations server
+    filesystem-mcp:
+      name: "filesystem-mcp"
+      command: "mcp-server-filesystem"
+      args: ["--root", "/workspace"]
+      env:
+        ALLOWED_PATHS: "/workspace,/tmp"
+        READ_ONLY: "false"
+      transport: "stdio"
+      auto_restart: true
+      settings:
+        timeout: "15s"
+        max_retries: 3
+    
+    # Custom Python-based MCP server
+    python-tools:
+      name: "python-tools"
+      command: "python"
+      args: ["-m", "my_mcp_server"]
+      env:
+        PYTHONPATH: "${WORKSPACE}/tools"
+        MCP_LOG_LEVEL: "INFO"
+      transport: "stdio"
+      auto_restart: true
+      max_restarts: 3
+      settings:
+        timeout: "45s"
+        max_retries: 2
+    
+    # Web scraping and API server
+    web-tools:
+      name: "web-tools"  
+      command: "./mcp-web-server"
+      env:
+        HTTP_TIMEOUT: "30"
+        MAX_REQUESTS_PER_MINUTE: "60"
+        USER_AGENT: "Sigil-MCP-Client/1.0"
+      transport: "stdio"
+      auto_restart: true
+      settings:
+        timeout: "20s"
+        max_retries: 1
+
+# Global MCP settings
+mcp_settings:
+  # Connection pool configuration
+  connection_pool:
+    default_size: 3
+    max_size: 10
+    cleanup_interval: "5m"
+  
+  # Health monitoring
+  health_monitoring:
+    enabled: true
+    check_interval: "15s"
+    failure_threshold: 3
+    recovery_timeout: "2m"
+  
+  # Logging configuration
+  logging:
+    level: "INFO"
+    include_server_logs: true
+    log_request_response: false # Set to true for debugging
+  
+  # Security settings
+  security:
+    sandbox_mode: true
+    restrict_file_access: true
+    allowed_domains: ["github.com", "api.example.com"]
+    timeout_enforcement: true
+
+# Model configuration for MCP models
+models:
+  providers:
+    mcp:
+      # MCP model definitions
+      models:
+        - name: "github-assistant"
+          server: "github-mcp"
+          capabilities: ["tools", "resources"]
+          description: "GitHub integration with repository management"
+          
+        - name: "data-analyst"
+          server: "postgres-mcp"
+          capabilities: ["tools", "resources"]
+          description: "Database querying and analysis"
+          
+        - name: "file-manager"
+          server: "filesystem-mcp"
+          capabilities: ["tools", "resources"]
+          description: "File system operations and management"
+          
+        - name: "python-assistant"
+          server: "python-tools"
+          capabilities: ["tools", "prompts"]
+          description: "Python code execution and tools"
+          
+        - name: "web-researcher"
+          server: "web-tools"
+          capabilities: ["tools", "resources"]
+          description: "Web scraping and API integration"
+
+# Usage examples in comments:
+#
+# List available MCP servers:
+#   sigil mcp list
+#
+# Start specific server:
+#   sigil mcp start github-mcp
+#
+# Check server status:
+#   sigil mcp status
+#
+# Use MCP model:
+#   sigil ask --model mcp://github-mcp/github-assistant "What are the recent issues?"
+#
+# Use MCP tools in edit mode:
+#   sigil edit myfile.py --model mcp://python-tools/python-assistant
+#
+# Use MCP resources:
+#   sigil explain --model mcp://filesystem-mcp/file-manager --context "project structure"
