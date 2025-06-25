@@ -507,9 +507,9 @@ func (h *ProtocolHandler) UnsubscribeFromResource(uri string) error {
 
 // PromptTemplate represents a prompt template
 type PromptTemplate struct {
-	Name        string                 `json:"name"`
-	Description string                 `json:"description,omitempty"`
-	Arguments   []TemplateArgument     `json:"arguments,omitempty"`
+	Name        string             `json:"name"`
+	Description string             `json:"description,omitempty"`
+	Arguments   []TemplateArgument `json:"arguments,omitempty"`
 }
 
 // TemplateArgument represents an argument for a prompt template
@@ -614,7 +614,7 @@ func (h *ProtocolHandler) handleServerMessage(msg *RPCMessage) {
 	switch msg.Method {
 	case "notifications/initialized":
 		// Server acknowledges initialization
-	case "notifications/cancelled":
+	case "notifications/canceled":
 		// Handle request cancellation
 		h.handleCancellation(msg)
 	case "notifications/progress":

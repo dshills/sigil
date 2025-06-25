@@ -238,13 +238,13 @@ func (c *ExplainCommand) outputResult(result *agent.OrchestrationResult) error {
 // formatOutput formats the explanation based on the requested format
 func (c *ExplainCommand) formatOutput(content string) (string, error) {
 	switch c.Format {
-	case "markdown":
+	case FormatMarkdown:
 		return c.formatMarkdown(content), nil
 	case "text":
 		return c.formatText(content), nil
 	case "json":
 		return c.formatJSON(content), nil
-	case "html":
+	case FormatHTML:
 		return c.formatHTML(content), nil
 	default:
 		return content, nil

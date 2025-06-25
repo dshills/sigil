@@ -302,7 +302,7 @@ func (c *ReviewCommand) formatOutput(content string, result *agent.Orchestration
 		return c.formatMarkdown(content, result), nil
 	case "text":
 		return c.formatText(content, result), nil
-	case "json":
+	case OutputFormatJSON:
 		return c.formatJSON(content, result), nil
 	case "xml":
 		return c.formatXML(content, result), nil
@@ -526,7 +526,7 @@ func (c *ReviewCommand) detectProjectLanguage() string {
 		return "javascript"
 	}
 	if c.fileExists("requirements.txt") || c.fileExists("setup.py") {
-		return "python"
+		return LangPython
 	}
 	if c.fileExists("pom.xml") || c.fileExists("build.gradle") {
 		return "java"
@@ -555,7 +555,7 @@ func (c *ReviewCommand) detectLanguage(filePath string) string {
 	} else if strings.HasSuffix(filePath, ".js") || strings.HasSuffix(filePath, ".ts") {
 		return "javascript"
 	} else if strings.HasSuffix(filePath, ".py") {
-		return "python"
+		return LangPython
 	} else if strings.HasSuffix(filePath, ".java") {
 		return "java"
 	} else if strings.HasSuffix(filePath, ".cpp") || strings.HasSuffix(filePath, ".c") {

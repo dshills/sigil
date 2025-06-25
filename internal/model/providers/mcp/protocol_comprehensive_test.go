@@ -54,7 +54,7 @@ func (t *MockTransport) Send(msg *RPCMessage) error {
 	if msg.ID != nil {
 		go func() {
 			time.Sleep(10 * time.Millisecond) // Simulate network delay
-			
+
 			t.mu.RLock()
 			response, exists := t.responses[*msg.ID]
 			t.mu.RUnlock()
@@ -97,7 +97,7 @@ func (t *MockTransport) Receive() (*RPCMessage, error) {
 func (t *MockTransport) Close() error {
 	t.mu.Lock()
 	defer t.mu.Unlock()
-	
+
 	t.connected = false
 	close(t.closeChannel)
 	return nil
@@ -488,7 +488,7 @@ func TestProtocolHandler_ServerNotifications(t *testing.T) {
 	// Test cancellation notification
 	cancelMsg := &RPCMessage{
 		JSONRPC: "2.0",
-		Method:  "notifications/cancelled",
+		Method:  "notifications/canceled",
 		Params:  json.RawMessage(`{"requestId": 123, "reason": "timeout"}`),
 	}
 

@@ -194,7 +194,7 @@ func TestProvider_MergeModelOptions(t *testing.T) {
 		Options: map[string]interface{}{
 			"timeout": "60s",
 			"env": map[string]interface{}{
-				"NEW_VAR": "new_value",
+				"NEW_VAR":  "new_value",
 				"EXISTING": "overridden",
 			},
 		},

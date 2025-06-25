@@ -87,7 +87,7 @@ func (m *MockServer) Start(ctx context.Context) error {
 
 	// Create a mock command that will run our mock server
 	m.cmd = exec.CommandContext(ctx, "cat")
-	
+
 	stdin, err := m.cmd.StdinPipe()
 	if err != nil {
 		return err

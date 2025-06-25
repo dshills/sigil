@@ -11,14 +11,14 @@ import (
 
 // ProcessManager manages MCP server processes
 type ProcessManager struct {
-	servers       map[string]*ManagedServer
+	servers        map[string]*ManagedServer
 	connectionPool map[string][]*ManagedServer
-	poolSize      int
-	healthTicker  *time.Ticker
-	ctx           context.Context
-	cancel        context.CancelFunc
-	mu            sync.RWMutex
-	poolMu        sync.RWMutex
+	poolSize       int
+	healthTicker   *time.Ticker
+	ctx            context.Context
+	cancel         context.CancelFunc
+	mu             sync.RWMutex
+	poolMu         sync.RWMutex
 }
 
 // ManagedServer represents a managed MCP server instance
@@ -33,8 +33,8 @@ type ManagedServer struct {
 	lastError       error
 	lastHealthCheck time.Time
 	requestCount    int64
-	inUse          bool
-	mu             sync.RWMutex
+	inUse           bool
+	mu              sync.RWMutex
 }
 
 // ServerConfig defines configuration for an MCP server
@@ -91,12 +91,12 @@ func (pm *ProcessManager) GetPooledConnection(serverName string) (*ManagedServer
 				conn.inUse = true
 				conn.requestCount++
 				conn.mu.Unlock()
-				
+
 				// Move connection to end of slice (LRU)
 				if i < len(connections)-1 {
 					connections[i], connections[len(connections)-1] = connections[len(connections)-1], connections[i]
 				}
-				
+
 				return conn, nil
 			}
 		}
@@ -689,10 +689,10 @@ func (pm *ProcessManager) GetOverallHealth() map[string]interface{} {
 	}
 
 	return map[string]interface{}{
-		"totalServers":     serverCount,
-		"connectedServers": connectedServers,
-		"pooledConnections": poolCount,
-		"totalRequests":    totalRequests,
+		"totalServers":        serverCount,
+		"connectedServers":    connectedServers,
+		"pooledConnections":   poolCount,
+		"totalRequests":       totalRequests,
 		"healthCheckInterval": "15s",
 	}
 }
