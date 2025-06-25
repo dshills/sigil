@@ -400,14 +400,154 @@ type ToolResult struct {
 
 // CallTool executes a tool on the MCP server
 func (m *Model) CallTool(ctx context.Context, toolCall ToolCall) (*ToolResult, error) {
-	// TODO: Implement tool calling
-	// This would use a "tools/call" method in the protocol
-	return nil, fmt.Errorf("tool calling not yet implemented")
+	if !m.server.Protocol.IsInitialized() {
+		return nil, fmt.Errorf("server protocol not initialized")
+	}
+
+	// Parse arguments
+	var args map[string]interface{}
+	if err := json.Unmarshal(toolCall.Arguments, &args); err != nil {
+		return nil, fmt.Errorf("failed to parse tool arguments: %w", err)
+	}
+
+	// Call tool on server
+	result, err := m.server.Protocol.CallTool(toolCall.Name, args)
+	if err != nil {
+		return &ToolResult{
+			Content: json.RawMessage(fmt.Sprintf(`{"error": "%s"}`, err.Error())),
+			IsError: true,
+		}, nil
+	}
+
+	// Convert result
+	contentBytes, err := json.Marshal(result.Content)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal tool result: %w", err)
+	}
+
+	return &ToolResult{
+		Content: contentBytes,
+		IsError: result.IsError,
+	}, nil
 }
 
 // ListTools returns available tools from the server
 func (m *Model) ListTools() ([]ToolDefinition, error) {
-	// TODO: Implement tool listing
-	// This would use a "tools/list" method in the protocol
-	return nil, fmt.Errorf("tool listing not yet implemented")
+	if !m.server.Protocol.IsInitialized() {
+		return nil, fmt.Errorf("server protocol not initialized")
+	}
+
+	return m.server.Protocol.ListTools()
+}
+
+// ListResources returns available resources from the server
+func (m *Model) ListResources() ([]ResourceDefinition, error) {
+	if !m.server.Protocol.IsInitialized() {
+		return nil, fmt.Errorf("server protocol not initialized")
+	}
+
+	return m.server.Protocol.ListResources()
+}
+
+// ReadResource reads a resource from the server
+func (m *Model) ReadResource(uri string) (*ResourceContent, error) {
+	if !m.server.Protocol.IsInitialized() {
+		return nil, fmt.Errorf("server protocol not initialized")
+	}
+
+	return m.server.Protocol.ReadResource(uri)
+}
+
+// ListPrompts returns available prompt templates from the server
+func (m *Model) ListPrompts() ([]PromptTemplate, error) {
+	if !m.server.Protocol.IsInitialized() {
+		return nil, fmt.Errorf("server protocol not initialized")
+	}
+
+	return m.server.Protocol.ListPrompts()
+}
+
+// GetPrompt gets a prompt template with arguments
+func (m *Model) GetPrompt(name string, arguments map[string]interface{}) (*PromptResult, error) {
+	if !m.server.Protocol.IsInitialized() {
+		return nil, fmt.Errorf("server protocol not initialized")
+	}
+
+	return m.server.Protocol.GetPrompt(name, arguments)
+}
+
+// GetConnectionPool returns a pooled connection for this model
+func (m *Model) GetConnectionPool() (*ManagedServer, error) {
+	return m.provider.processManager.GetPooledConnection(m.server.Name)
+}
+
+// ReleaseConnection releases a pooled connection
+func (m *Model) ReleaseConnection(server *ManagedServer) {
+	m.provider.processManager.ReleaseConnection(server)
+}
+
+// GetServerStatus returns the status of the underlying server
+func (m *Model) GetServerStatus() ServerStatus {
+	return m.server.GetStatus()
+}
+
+// Enhanced provider methods
+
+// GetServers returns all managed servers
+func (p *Provider) GetServers() []*ManagedServer {
+	return p.processManager.ListServers()
+}
+
+// GetServerStatus returns status for a specific server
+func (p *Provider) GetServerStatus(name string) (ServerStatus, error) {
+	server, err := p.processManager.GetServer(name)
+	if err != nil {
+		return ServerStatus{}, err
+	}
+	return server.GetStatus(), nil
+}
+
+// GetPoolStatus returns connection pool status
+func (p *Provider) GetPoolStatus() map[string][]ServerStatus {
+	return p.processManager.GetPoolStatus()
+}
+
+// GetOverallHealth returns overall health metrics
+func (p *Provider) GetOverallHealth() map[string]interface{} {
+	return p.processManager.GetOverallHealth()
+}
+
+// RestartServer restarts a specific server
+func (p *Provider) RestartServer(name string) error {
+	ctx := context.Background()
+	server, err := p.processManager.GetServer(name)
+	if err != nil {
+		return err
+	}
+
+	// Stop the server
+	if err := p.processManager.StopServer(name); err != nil {
+		return fmt.Errorf("failed to stop server: %w", err)
+	}
+
+	// Start it again
+	_, err = p.processManager.StartServer(ctx, server.Config)
+	return err
+}
+
+// StartServer starts a server with the given configuration
+func (p *Provider) StartServer(config ServerConfig) error {
+	ctx := context.Background()
+	_, err := p.processManager.StartServer(ctx, config)
+	return err
+}
+
+// StopServer stops a specific server
+func (p *Provider) StopServer(name string) error {
+	return p.processManager.StopServer(name)
+}
+
+// ReloadConfigurations reloads server configurations from files
+func (p *Provider) ReloadConfigurations() error {
+	return p.loadConfigurations()
 }
