@@ -75,7 +75,7 @@ func (m *MockSandboxManager) Cleanup() error {
 func TestNewBaseAgent(t *testing.T) {
 	mockModel := &MockModel{}
 	mockSandbox := &MockSandboxManager{}
-	
+
 	capabilities := []Capability{CapabilityCodeGeneration, CapabilityCodeReview}
 	config := AgentConfig{
 		Role:         RoleLead,
@@ -97,7 +97,7 @@ func TestNewBaseAgent(t *testing.T) {
 func TestBaseAgent_HasCapability(t *testing.T) {
 	mockModel := &MockModel{}
 	mockSandbox := &MockSandboxManager{}
-	
+
 	capabilities := []Capability{CapabilityCodeGeneration, CapabilityCodeReview}
 	config := AgentConfig{}
 
@@ -117,7 +117,7 @@ func TestBaseAgent_HasCapability(t *testing.T) {
 func TestNewLeadAgent(t *testing.T) {
 	mockModel := &MockModel{}
 	mockSandbox := &MockSandboxManager{}
-	
+
 	config := AgentConfig{
 		Role:    RoleLead,
 		Model:   "test-model",
@@ -130,14 +130,14 @@ func TestNewLeadAgent(t *testing.T) {
 	assert.Equal(t, "lead-1", agent.GetID())
 	assert.Equal(t, RoleLead, agent.GetRole())
 	assert.Equal(t, mockModel, agent.GetModel())
-	
+
 	// Check that lead agent has expected capabilities
 	expectedCapabilities := []Capability{
 		CapabilityCodeGeneration,
 		CapabilityRefactoring,
 		CapabilityDocumentation,
 	}
-	
+
 	capabilities := agent.GetCapabilities()
 	assert.Len(t, capabilities, len(expectedCapabilities))
 	for _, cap := range expectedCapabilities {
@@ -315,8 +315,8 @@ func TestProposal_Creation(t *testing.T) {
 			},
 		},
 		Impact: Impact{
-			Scope: ScopeLocal,
-			Risk:  RiskLow,
+			Scope:    ScopeLocal,
+			Risk:     RiskLow,
 			Benefits: []string{"Better error handling"},
 		},
 	}
@@ -394,23 +394,23 @@ func TestDefaultOrchestrationConfig(t *testing.T) {
 	assert.Equal(t, 5*time.Minute, config.ReviewTimeout)
 	assert.Equal(t, 3, config.MaxRetries)
 	assert.True(t, config.EnableParallelReview)
-	
+
 	// Check quality gate
 	assert.Equal(t, 0.8, config.QualityGate.MinConfidence)
 	assert.Equal(t, 2, config.QualityGate.MinReviewers)
 	assert.Equal(t, 4, config.QualityGate.MaxReviewers)
 	assert.Contains(t, config.QualityGate.RequiredCapabilities, CapabilityCodeReview)
-	
+
 	// Check agent profiles
 	assert.Contains(t, config.AgentProfiles, "lead")
 	assert.Contains(t, config.AgentProfiles, "reviewer")
-	
+
 	leadProfile := config.AgentProfiles["lead"]
 	assert.Equal(t, RoleLead, leadProfile.Role)
 	assert.Equal(t, "claude-3-5-sonnet-20241022", leadProfile.Model)
 	assert.Contains(t, leadProfile.Capabilities, CapabilityCodeGeneration)
 	assert.True(t, leadProfile.Enabled)
-	
+
 	reviewerProfile := config.AgentProfiles["reviewer"]
 	assert.Equal(t, RoleReviewer, reviewerProfile.Role)
 	assert.Equal(t, "gpt-4", reviewerProfile.Model)

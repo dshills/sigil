@@ -34,7 +34,7 @@ func TestFactory_CreateLeadAgent(t *testing.T) {
 	// This will fail because we don't have real model providers
 	// but we can test the factory logic up to that point
 	agent, err := factory.CreateAgent("lead-1", agentConfig)
-	
+
 	// We expect an error because the model provider isn't registered
 	assert.Error(t, err)
 	assert.Nil(t, agent)
@@ -56,7 +56,7 @@ func TestFactory_CreateReviewerAgent(t *testing.T) {
 	}
 
 	agent, err := factory.CreateAgent("reviewer-1", agentConfig)
-	
+
 	// We expect an error because the model provider isn't registered
 	assert.Error(t, err)
 	assert.Nil(t, agent)
@@ -75,7 +75,7 @@ func TestFactory_CreateAgentWithInvalidRole(t *testing.T) {
 	}
 
 	agent, err := factory.CreateAgent("invalid-1", agentConfig)
-	
+
 	// Should fail on model lookup before reaching role validation
 	assert.Error(t, err)
 	assert.Nil(t, agent)
@@ -95,7 +95,7 @@ func TestFactory_ValidateConfig(t *testing.T) {
 		invalidConfig := config
 		invalidConfig.MaxAgents = 0
 		invalidFactory := NewFactory(mockSandbox, invalidConfig)
-		
+
 		err := invalidFactory.ValidateConfig()
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "max_agents must be positive")
@@ -105,7 +105,7 @@ func TestFactory_ValidateConfig(t *testing.T) {
 		invalidConfig := config
 		invalidConfig.ConsensusThreshold = 1.5
 		invalidFactory := NewFactory(mockSandbox, invalidConfig)
-		
+
 		err := invalidFactory.ValidateConfig()
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "consensus_threshold must be between 0.0 and 1.0")
@@ -118,7 +118,7 @@ func TestFactory_GetRecommendedConfig(t *testing.T) {
 	factory := NewFactory(mockSandbox, config)
 
 	recommendedConfig := factory.GetRecommendedConfig()
-	
+
 	assert.NotNil(t, recommendedConfig)
 	assert.Equal(t, 5, recommendedConfig.MaxAgents)
 	assert.Equal(t, 0.7, recommendedConfig.ConsensusThreshold)
@@ -172,7 +172,7 @@ func TestAgentConfig_Validation(t *testing.T) {
 			// Test that we can create the config struct
 			assert.NotEmpty(t, tt.config.Role)
 			assert.NotEmpty(t, tt.config.Model)
-			
+
 			if tt.valid {
 				assert.True(t, len(tt.config.Capabilities) > 0 || !tt.config.Enabled)
 			}
